@@ -6,6 +6,10 @@ Type-safe theme management system with CSS variables, runtime switching, and per
 [![license](https://img.shields.io/npm/l/@motioneffector/theme.svg)](https://github.com/motioneffector/theme/blob/main/LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 
+## Demo
+
+[Try the interactive demo](https://motioneffector.github.io/theme/)
+
 ## Installation
 
 ```bash
@@ -461,10 +465,6 @@ const mainTheme = createThemeManager({
   target: document.getElementById('main')
 })
 ```
-
-## Demo
-
-[Try the interactive demo](https://motioneffector.github.io/theme/demo.html)
 
 ## Browser Support
 

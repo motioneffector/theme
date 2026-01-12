@@ -135,11 +135,12 @@
     }
 
     .info-box {
-      background: #dbeafe;
-      border-left: 4px solid #3b82f6;
+      background: var(--color-surface, #dbeafe);
+      border-left: 4px solid var(--color-primary, #3b82f6);
       padding: 12px;
       margin: 10px 0;
       border-radius: 4px;
+      color: var(--color-text, #1a1a1a);
     }
 
     .demo-card {
@@ -525,8 +526,8 @@
       name: 'light',
       tokens: {
         primary: '#3b82f6',
-        background: '#ffffff',
-        surface: '#f9f9f9',
+        background: '#f8f9fa',
+        surface: '#ffffff',
         text: '#1a1a1a',
         textMuted: '#666666',
         border: '#ddd',
@@ -551,12 +552,12 @@
       name: 'solarized',
       tokens: {
         primary: '#268bd2',
-        background: '#fdf6e3',
-        surface: '#eee8d5',
-        text: '#657b83',
+        background: '#eee8d5',
+        surface: '#e4ddc9',
+        text: '#586e75',
         textMuted: '#93a1a1',
         border: '#d3cbb4',
-        codeBg: '#eee8d5'
+        codeBg: '#e4ddc9'
       }
     };
 
