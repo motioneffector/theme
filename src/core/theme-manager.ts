@@ -55,6 +55,11 @@ function validateTheme(theme: unknown): void {
   ) {
     throw new TypeError('Theme must have a tokens property')
   }
+
+  const tokensObj = t.tokens as Record<string, unknown>
+  if (Object.keys(tokensObj).length === 0) {
+    throw new TypeError('Cannot create theme: tokens object cannot be empty')
+  }
 }
 
 /**

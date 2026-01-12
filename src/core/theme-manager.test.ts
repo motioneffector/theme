@@ -3,7 +3,7 @@ import { createThemeManager } from './theme-manager'
 import type { Theme, ThemeManagerOptions } from '../types'
 
 // Test helper functions
-function createTestTheme(name: string, tokens: Record<string, string> = {}): Theme {
+function createTestTheme(name: string, tokens: Record<string, string> = { primary: '#000' }): Theme {
   return { name, tokens }
 }
 
@@ -70,8 +70,8 @@ describe('createThemeManager(options)', () => {
 
     it('throws Error if themes array contains duplicate names (exact match)', () => {
       const themes = [
-        createTestTheme('duplicate', {}),
-        createTestTheme('duplicate', {}),
+        createTestTheme('duplicate'),
+        createTestTheme('duplicate'),
       ]
 
       expect(() => createThemeManager({ themes })).toThrow(Error)
@@ -79,8 +79,8 @@ describe('createThemeManager(options)', () => {
 
     it('throws Error if themes array contains duplicate names (case-sensitive: "Dark" and "dark" are different)', () => {
       const themes = [
-        createTestTheme('Dark', {}),
-        createTestTheme('dark', {}),
+        createTestTheme('Dark'),
+        createTestTheme('dark'),
       ]
 
       expect(() => createThemeManager({ themes })).not.toThrow()
@@ -109,7 +109,7 @@ describe('createThemeManager(options)', () => {
     })
 
     it('defaultTheme matching is case-sensitive', () => {
-      const themes = [createTestTheme('Dark', {})]
+      const themes = [createTestTheme('Dark')]
 
       expect(() => createThemeManager({ themes, defaultTheme: 'dark' })).toThrow(Error)
     })
@@ -197,6 +197,12 @@ describe('createThemeManager(options)', () => {
   })
 
   describe('Optional: Target Element', () => {
+    afterEach(() => {
+      // Clean up CSS variables from document.documentElement after each test
+      document.documentElement.style.removeProperty('--color-primary')
+      document.documentElement.style.removeProperty('--color-background')
+    })
+
     it('defaults to document.documentElement if target not specified', () => {
       const themes = [createTestTheme('test', { primary: '#000' })]
       const manager = createThemeManager({ themes })
@@ -278,7 +284,7 @@ describe('manager.apply(themeName)', () => {
     })
 
     it('name matching is case-sensitive ("Dark" !== "dark")', () => {
-      const themes = [createTestTheme('Dark', {})]
+      const themes = [createTestTheme('Dark')]
       const manager = createThemeManager({ themes, target: mockElement })
 
       expect(() => manager.apply('dark')).toThrow(Error)
@@ -630,18 +636,18 @@ describe('manager.list()', () => {
 
   it('returns names in registration order (initial themes first, then registered)', () => {
     const themes = [
-      createTestTheme('first', {}),
-      createTestTheme('second', {}),
-      createTestTheme('third', {}),
+      createTestTheme('first'),
+      createTestTheme('second'),
+      createTestTheme('third'),
     ]
     const manager = createThemeManager({ themes })
-    manager.register(createTestTheme('fourth', {}))
+    manager.register(createTestTheme('fourth'))
 
     expect(manager.list()).toEqual(['first', 'second', 'third', 'fourth'])
   })
 
   it('returns empty array never (manager requires at least one theme)', () => {
-    const themes = [createTestTheme('only', {})]
+    const themes = [createTestTheme('only')]
     const manager = createThemeManager({ themes })
 
     expect(manager.list().length).toBeGreaterThan(0)
@@ -671,7 +677,7 @@ describe('manager.list()', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
 
-    manager.register(createTestTheme('dynamic', {}))
+    manager.register(createTestTheme('dynamic'))
 
     expect(manager.list()).toContain('dynamic')
   })
@@ -679,7 +685,7 @@ describe('manager.list()', () => {
   it('excludes unregistered themes', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
-    manager.register(createTestTheme('temp', {}))
+    manager.register(createTestTheme('temp'))
 
     manager.unregister('temp')
 
@@ -705,7 +711,7 @@ describe('manager.get(themeName)', () => {
   })
 
   it('matching is case-sensitive', () => {
-    const themes = [createTestTheme('Dark', {})]
+    const themes = [createTestTheme('Dark')]
     const manager = createThemeManager({ themes })
 
     expect(manager.get('dark')).toBeUndefined()
@@ -785,7 +791,7 @@ describe('manager.has(themeName)', () => {
   })
 
   it('matching is case-sensitive', () => {
-    const themes = [createTestTheme('Dark', {})]
+    const themes = [createTestTheme('Dark')]
     const manager = createThemeManager({ themes })
 
     expect(manager.has('dark')).toBe(false)
@@ -807,7 +813,7 @@ describe('manager.register(theme)', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
 
-    const result = manager.register(createTestTheme('new', {}))
+    const result = manager.register(createTestTheme('new'))
 
     expect(result).toBeUndefined()
   })
@@ -825,7 +831,7 @@ describe('manager.register(theme)', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
 
-    manager.register(createTestTheme('new', {}))
+    manager.register(createTestTheme('new'))
 
     const list = manager.list()
     expect(list[list.length - 1]).toBe('new')
@@ -846,7 +852,7 @@ describe('manager.register(theme)', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
 
-    manager.register(createTestTheme('new', {}))
+    manager.register(createTestTheme('new'))
 
     expect(manager.currentName()).toBe('light')
   })
@@ -857,7 +863,7 @@ describe('manager.register(theme)', () => {
     const callback = vi.fn()
     manager.onChange(callback)
 
-    manager.register(createTestTheme('new', {}))
+    manager.register(createTestTheme('new'))
 
     expect(callback).not.toHaveBeenCalled()
   })
@@ -873,7 +879,7 @@ describe('manager.register(theme)', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
 
-    const newTheme = createTestTheme('fromHelper', {})
+    const newTheme = createTestTheme('fromHelper')
     expect(() => manager.register(newTheme)).not.toThrow()
   })
 
@@ -881,7 +887,7 @@ describe('manager.register(theme)', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
 
-    expect(() => manager.register(createTestTheme('light', {}))).toThrow(Error)
+    expect(() => manager.register(createTestTheme('light'))).toThrow(Error)
   })
 
   it('throws TypeError if theme is undefined', () => {
@@ -933,7 +939,7 @@ describe('manager.register(theme)', () => {
 
 describe('manager.unregister(themeName)', () => {
   it('removes theme by name', () => {
-    const themes = [...createSimpleThemes(), createTestTheme('temp', {})]
+    const themes = [...createSimpleThemes(), createTestTheme('temp')]
     const manager = createThemeManager({ themes })
 
     manager.unregister('temp')
@@ -951,7 +957,7 @@ describe('manager.unregister(themeName)', () => {
   })
 
   it('removed theme no longer in list()', () => {
-    const themes = [...createSimpleThemes(), createTestTheme('temp', {})]
+    const themes = [...createSimpleThemes(), createTestTheme('temp')]
     const manager = createThemeManager({ themes })
 
     manager.unregister('temp')
@@ -960,7 +966,7 @@ describe('manager.unregister(themeName)', () => {
   })
 
   it('removed theme returns undefined from get()', () => {
-    const themes = [...createSimpleThemes(), createTestTheme('temp', {})]
+    const themes = [...createSimpleThemes(), createTestTheme('temp')]
     const manager = createThemeManager({ themes })
 
     manager.unregister('temp')
@@ -969,7 +975,7 @@ describe('manager.unregister(themeName)', () => {
   })
 
   it('removed theme returns false from has()', () => {
-    const themes = [...createSimpleThemes(), createTestTheme('temp', {})]
+    const themes = [...createSimpleThemes(), createTestTheme('temp')]
     const manager = createThemeManager({ themes })
 
     manager.unregister('temp')
@@ -992,7 +998,7 @@ describe('manager.unregister(themeName)', () => {
   })
 
   it('does not trigger onChange callback', () => {
-    const themes = [...createSimpleThemes(), createTestTheme('temp', {})]
+    const themes = [...createSimpleThemes(), createTestTheme('temp')]
     const manager = createThemeManager({ themes })
     const callback = vi.fn()
     manager.onChange(callback)
@@ -1003,7 +1009,7 @@ describe('manager.unregister(themeName)', () => {
   })
 
   it('allows re-registering a theme with same name after unregister', () => {
-    const themes = [...createSimpleThemes(), createTestTheme('temp', {})]
+    const themes = [...createSimpleThemes(), createTestTheme('temp')]
     const manager = createThemeManager({ themes })
 
     manager.unregister('temp')
@@ -1035,7 +1041,7 @@ describe('Registration Edge Cases', () => {
   })
 
   it('unregistering non-active theme while another is active works correctly', () => {
-    const themes = [...createSimpleThemes(), createTestTheme('temp', {})]
+    const themes = [...createSimpleThemes(), createTestTheme('temp')]
     const manager = createThemeManager({ themes })
     manager.apply('dark')
 
@@ -1046,7 +1052,7 @@ describe('Registration Edge Cases', () => {
   })
 
   it('manager with single theme: cannot unregister it (would leave zero themes)', () => {
-    const themes = [createTestTheme('only', {})]
+    const themes = [createTestTheme('only')]
     const manager = createThemeManager({ themes })
 
     expect(() => manager.unregister('only')).toThrow(Error)
@@ -1152,13 +1158,13 @@ describe('manager.onChange(callback)', () => {
     const callback = vi.fn()
     manager.onChange(callback)
 
-    manager.register(createTestTheme('new', {}))
+    manager.register(createTestTheme('new'))
 
     expect(callback).not.toHaveBeenCalled()
   })
 
   it('callback does NOT fire when unregister() is called', () => {
-    const themes = [...createSimpleThemes(), createTestTheme('temp', {})]
+    const themes = [...createSimpleThemes(), createTestTheme('temp')]
     const manager = createThemeManager({ themes })
     const callback = vi.fn()
     manager.onChange(callback)
@@ -1213,7 +1219,7 @@ describe('Multiple Callbacks', () => {
   })
 
   it('callback can safely call apply() (does not cause infinite loop if different theme)', () => {
-    const themes = [...createSimpleThemes(), createTestTheme('third', {})]
+    const themes = [...createSimpleThemes(), createTestTheme('third')]
     const manager = createThemeManager({ themes })
     const callback = vi.fn((newTheme: Theme) => {
       if (newTheme.name === 'dark') {
