@@ -1083,16 +1083,23 @@
         }
       },
       {
-        name: 'unregister: throws on last theme',
+        name: 'unregister: throws when only one theme remains',
         fn: async () => {
           const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
+            themes: [
+              { name: 'a', tokens: { primary: '#000' } },
+              { name: 'b', tokens: { primary: '#fff' } }
+            ],
+            defaultTheme: 'a'
           });
+          // Unregister the non-active theme
+          mgr.unregister('b');
+          // Now only 'a' remains and it's active
           try {
-            mgr.unregister('test');
+            mgr.unregister('a');
             throw new Error('Should have thrown');
           } catch (e) {
-            if (!e.message.includes('only theme')) throw new Error(`Wrong error: ${e.message}`);
+            if (!e.message.includes('currently active')) throw new Error(`Wrong error: ${e.message}`);
           }
         }
       },
