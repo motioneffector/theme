@@ -94,7 +94,7 @@ Returns all available theme names.
 
 Registers a new theme at runtime.
 
-### `themeManager.onchange(callback)`
+### `themeManager.onChange(callback)`
 
 Subscribe to theme change events.
 
