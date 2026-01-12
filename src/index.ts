@@ -1,6 +1,16 @@
-// @motioneffector/theme
-// CSS variable theming system
+// Functions
+export { createTheme } from './core/theme'
+export { createThemeManager } from './core/theme-manager'
 
-export function hello(): string {
-  return 'theme library loaded'
-}
+// Errors
+export { ThemeError } from './errors'
+
+// Types
+export type {
+  Theme,
+  ThemeManager,
+  ThemeManagerOptions,
+  ChangeCallback,
+  SystemChangeCallback,
+  Unsubscribe,
+} from './types'
