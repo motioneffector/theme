@@ -492,4 +492,4 @@ import type {
 
 ## License
 
-MIT © [MotionEffector](https://github.com/motioneffector)
+MIT © [motioneffector](https://github.com/motioneffector)
