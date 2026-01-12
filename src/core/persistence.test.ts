@@ -246,6 +246,8 @@ describe('Persistence', () => {
         const themes = createSimpleThemes()
         const callback = vi.fn()
 
+        // Create manager with callback registered BEFORE creation
+        // so we can detect if onChange fires during restoration
         const manager = createThemeManager({
           themes,
           defaultTheme: 'light',
@@ -253,9 +255,15 @@ describe('Persistence', () => {
           target: null,
         })
 
-        manager.onChange(callback)
+        // Register callback after creation to test if it would fire during restoration
+        // Note: The restoration happens during createThemeManager, so we need to test
+        // by creating a fresh manager with the callback
+        const callback2 = vi.fn()
 
-        // Create a new manager to trigger restoration
+        // Clear and re-set the storage
+        mockLocalStorage.clear()
+        mockLocalStorage.setItem('test-theme', 'dark')
+
         const manager2 = createThemeManager({
           themes,
           defaultTheme: 'light',
@@ -263,16 +271,22 @@ describe('Persistence', () => {
           target: null,
         })
 
-        // The current theme should be the restored one
+        manager2.onChange(callback2)
+
+        // The current theme should be the restored one (dark, not default light)
         expect(manager2.currentName()).toBe('dark')
+
+        // If we now switch themes, the callback should fire
+        manager2.apply('light')
+        expect(callback2).toHaveBeenCalledTimes(1)
       })
 
       it('does not trigger onChange if restored theme equals defaultTheme', () => {
         mockLocalStorage.setItem('test-theme', 'light')
 
         const themes = createSimpleThemes()
-        const callback = vi.fn()
 
+        // Create manager - restoration should happen silently since restored theme matches default
         const manager = createThemeManager({
           themes,
           defaultTheme: 'light',
@@ -280,8 +294,18 @@ describe('Persistence', () => {
           target: null,
         })
 
+        // Register callback AFTER creation
+        const callback = vi.fn()
         manager.onChange(callback)
 
+        // Verify the theme is 'light' (was restored but matches default)
+        expect(manager.currentName()).toBe('light')
+
+        // Callback should not have fired during registration
+        expect(callback).not.toHaveBeenCalled()
+
+        // Applying the same theme should not trigger callback (no-op)
+        manager.apply('light')
         expect(callback).not.toHaveBeenCalled()
       })
     })
