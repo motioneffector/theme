@@ -94,7 +94,7 @@ export function createThemeManager(options: ThemeManagerOptions): ThemeManager {
   }
 
   // Setup prefix
-  const prefix = options.prefix !== undefined ? options.prefix : '--color-'
+  const prefix = options.prefix ?? '--color-'
 
   // Setup target
   const target =
@@ -105,7 +105,8 @@ export function createThemeManager(options: ThemeManagerOptions): ThemeManager {
         : null
 
   // Determine default theme
-  const defaultThemeName = options.defaultTheme !== undefined ? options.defaultTheme : options.themes[0].name
+  // We've already validated themes is not empty, so [0] is safe
+  const defaultThemeName = options.defaultTheme ?? options.themes[0]!.name
   const defaultTheme = options.themes.find(t => t.name === defaultThemeName)
   if (!defaultTheme) {
     throw new Error(`Cannot create theme manager: defaultTheme '${defaultThemeName}' not found in themes`)
@@ -151,7 +152,6 @@ export function createThemeManager(options: ThemeManagerOptions): ThemeManager {
 
       // Check if saved theme exists
       if (themesMap.has(saved)) {
-        const previousTheme = currentTheme
         currentTheme = themesMap.get(saved)!
         applyCSSVariables(currentTheme)
 
@@ -337,7 +337,7 @@ export function createThemeManager(options: ThemeManagerOptions): ThemeManager {
       try {
         if (typeof localStorage === 'undefined') return
         localStorage.removeItem(options.storageKey)
-      } catch (error) {
+      } catch {
         // Silently ignore errors
       }
     },
