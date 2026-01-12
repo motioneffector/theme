@@ -1,8 +1,32 @@
 {
   "name": "@motioneffector/theme",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "description": "Type-safe theme management with CSS variables, runtime switching, and persistence support",
+  "author": "MotionEffector",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/motioneffector/theme"
+  },
+  "homepage": "https://github.com/motioneffector/theme#readme",
+  "bugs": {
+    "url": "https://github.com/motioneffector/theme/issues"
+  },
+  "keywords": [
+    "theme",
+    "theming",
+    "css-variables",
+    "dark-mode",
+    "color-scheme",
+    "typescript",
+    "theme-manager",
+    "css-custom-properties",
+    "theme-switching",
+    "ui-theming"
+  ],
   "type": "module",
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -11,8 +35,15 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
   ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -20,7 +51,8 @@
     "test:run": "vitest run",
     "lint": "eslint src",
     "format": "prettier --write src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run test:run && npm run build"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
