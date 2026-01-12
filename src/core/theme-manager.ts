@@ -63,7 +63,28 @@ function validateTheme(theme: unknown): void {
 }
 
 /**
- * Creates a theme manager instance.
+ * Creates a theme manager instance for managing CSS variable-based themes.
+ *
+ * @param options - Configuration options for the theme manager
+ * @returns A ThemeManager instance with methods to apply, register, and manage themes
+ *
+ * @throws {TypeError} If options is null/undefined or themes array is invalid
+ * @throws {Error} If themes array contains duplicates or defaultTheme doesn't exist
+ *
+ * @example
+ * ```typescript
+ * const manager = createThemeManager({
+ *   themes: [
+ *     { name: 'light', tokens: { primary: '#000', background: '#fff' } },
+ *     { name: 'dark', tokens: { primary: '#fff', background: '#000' } }
+ *   ],
+ *   defaultTheme: 'light',
+ *   storageKey: 'app-theme',
+ *   prefix: '--color-'
+ * })
+ *
+ * manager.apply('dark')
+ * ```
  */
 export function createThemeManager(options: ThemeManagerOptions): ThemeManager {
   // Validate options
