@@ -151,6 +151,38 @@ body {
   text-decoration: underline;
 }
 
+.header-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+.header-actions .btn {
+  font-size: var(--font-size-md);
+  padding: var(--space-sm) var(--space-lg);
+}
+
+/* Demo automation highlight */
+.demo-highlight {
+  outline: 3px solid var(--accent-yellow-bright) !important;
+  outline-offset: 2px;
+  animation: demo-pulse 0.5s ease-in-out;
+}
+
+@keyframes demo-pulse {
+  0%, 100% { outline-color: var(--accent-yellow-bright); }
+  50% { outline-color: var(--accent-yellow); }
+}
+
+.demo-active-btn {
+  animation: demo-click 0.3s ease;
+}
+
+@keyframes demo-click {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+}
+
 /* ============================================
    EXHIBITS
    ============================================ */
@@ -992,6 +1024,10 @@ body {
           📖 Manual
         </a>
       </nav>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="run-all-demos">▶ Watch Demo</button>
+        <button class="btn btn-secondary" id="reset-page">↻ Reset Page</button>
+      </div>
     </header>
 
     <main class="exhibits">
@@ -2249,6 +2285,206 @@ body {
       if (calls !== 0) throw new Error('Callback still firing')
       m.dispose()
     })
+
+    // ============================================
+    // DEMO AUTOMATION
+    // ============================================
+
+    let demoRunning = false
+
+    async function sleep(ms) {
+      return new Promise(r => setTimeout(r, ms))
+    }
+
+    function scrollToElement(el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+
+    function highlightElement(el) {
+      el.classList.add('demo-highlight')
+      setTimeout(() => el.classList.remove('demo-highlight'), 600)
+    }
+
+    async function simulateClick(el) {
+      el.classList.add('demo-active-btn')
+      await sleep(150)
+      el.click()
+      await sleep(150)
+      el.classList.remove('demo-active-btn')
+    }
+
+    async function simulateHover(el, duration = 400) {
+      el.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }))
+      await sleep(duration)
+      el.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }))
+    }
+
+    async function runAllDemos() {
+      if (demoRunning) return
+      demoRunning = true
+
+      const runDemoBtn = document.getElementById('run-all-demos')
+      runDemoBtn.disabled = true
+      runDemoBtn.textContent = '⏸ Running...'
+
+      try {
+        // ========== EXHIBIT 1: Theme Switcher ==========
+        const exhibit1 = document.getElementById('exhibit-1')
+        scrollToElement(exhibit1)
+        highlightElement(exhibit1.closest('.exhibit'))
+        await sleep(500)
+
+        // Cycle through themes
+        const themeButtons = document.querySelectorAll('#theme-buttons .theme-btn')
+        for (const btn of themeButtons) {
+          highlightElement(btn)
+          await simulateClick(btn)
+          await sleep(600)
+        }
+
+        // Back to dark
+        const darkBtn = document.querySelector('[data-theme="dark"]')
+        if (darkBtn) {
+          await simulateClick(darkBtn)
+          await sleep(400)
+        }
+
+        // Demo clear storage
+        const clearBtn = document.getElementById('clear-storage')
+        highlightElement(clearBtn)
+        await simulateClick(clearBtn)
+        await sleep(500)
+
+        // ========== EXHIBIT 2: Token Tracer ==========
+        const exhibit2 = document.getElementById('exhibit-2')
+        scrollToElement(exhibit2)
+        highlightElement(exhibit2.closest('.exhibit'))
+        await sleep(500)
+
+        // Hover over token cards to show tracing
+        const tokenCards = document.querySelectorAll('.token-card')
+        const cardsToDemo = Array.from(tokenCards).slice(0, 5) // Demo first 5 tokens
+        for (const card of cardsToDemo) {
+          highlightElement(card)
+          await simulateHover(card, 600)
+          await sleep(200)
+        }
+
+        // Click one to show copy
+        if (tokenCards[0]) {
+          await simulateClick(tokenCards[0])
+          await sleep(600)
+        }
+
+        // ========== EXHIBIT 3: Theme Painter ==========
+        const exhibit3 = document.getElementById('exhibit-3')
+        scrollToElement(exhibit3)
+        highlightElement(exhibit3.closest('.exhibit'))
+        await sleep(500)
+
+        // Demo presets
+        const presetButtons = document.querySelectorAll('.preset-btn')
+        const presetsToDemo = ['ocean', 'sunset', 'forest', 'neon', 'random']
+        for (const presetName of presetsToDemo) {
+          const btn = document.querySelector(`[data-preset="${presetName}"]`)
+          if (btn) {
+            highlightElement(btn)
+            await simulateClick(btn)
+            await sleep(500)
+          }
+        }
+
+        // Demo a color picker change
+        const colorPickers = document.querySelectorAll('.color-picker-input')
+        if (colorPickers[0]) {
+          const picker = colorPickers[0]
+          highlightElement(picker.closest('.color-picker-row'))
+          const originalColor = picker.value
+
+          // Animate through some colors
+          const colors = ['#ff0000', '#00ff00', '#0000ff', '#ff00ff', originalColor]
+          for (const color of colors) {
+            picker.value = color
+            picker.dispatchEvent(new Event('input', { bubbles: true }))
+            await sleep(300)
+          }
+        }
+
+        // Save a demo theme
+        const themeNameInput = document.getElementById('theme-name')
+        const saveBtn = document.getElementById('save-theme')
+
+        // Generate unique name
+        let themeName = 'demo-theme'
+        let counter = 1
+        while (manager.has(themeName)) {
+          themeName = `demo-theme-${counter++}`
+        }
+
+        themeNameInput.value = themeName
+        highlightElement(themeNameInput)
+        await sleep(400)
+        highlightElement(saveBtn)
+        await simulateClick(saveBtn)
+        await sleep(600)
+
+        // Show the new theme in registered themes
+        const newThemeEl = document.querySelector(`[data-theme="${themeName}"]`)
+        if (newThemeEl) {
+          highlightElement(newThemeEl)
+          await sleep(400)
+
+          // Remove it to clean up
+          const removeBtn = newThemeEl.querySelector('.registered-theme-remove')
+          if (removeBtn) {
+            await simulateClick(removeBtn)
+            await sleep(400)
+          }
+        }
+
+        // Reset to a built-in theme
+        const resetBtn = document.getElementById('reset-theme')
+        highlightElement(resetBtn)
+        await simulateClick(resetBtn)
+        await sleep(400)
+
+        // ========== TEST RUNNER ==========
+        const testRunner = document.querySelector('.test-runner')
+        scrollToElement(testRunner)
+        highlightElement(testRunner)
+        await sleep(500)
+
+        // Run tests
+        const runTestsBtn = document.getElementById('run-tests')
+        highlightElement(runTestsBtn)
+        await simulateClick(runTestsBtn)
+
+        // Wait for tests to complete
+        await new Promise(resolve => {
+          const checkInterval = setInterval(() => {
+            if (!runTestsBtn.disabled) {
+              clearInterval(checkInterval)
+              resolve()
+            }
+          }, 100)
+        })
+
+        await sleep(500)
+
+        // Scroll back to top
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        await sleep(500)
+
+      } finally {
+        demoRunning = false
+        runDemoBtn.disabled = false
+        runDemoBtn.textContent = '▶ Watch Demo'
+      }
+    }
+
+    // Button handlers
+    document.getElementById('run-all-demos').addEventListener('click', runAllDemos)
+    document.getElementById('reset-page').addEventListener('click', () => location.reload())
 
     // ============================================
     // INITIALIZE
