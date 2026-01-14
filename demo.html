@@ -1025,7 +1025,6 @@ body {
         </a>
       </nav>
       <div class="header-actions">
-        <button class="btn btn-primary" id="run-all-demos">▶ Watch Demo</button>
         <button class="btn btn-secondary" id="reset-page">↻ Reset Page</button>
       </div>
     </header>
@@ -1986,6 +1985,10 @@ body {
 
         runBtn.disabled = false
         this.running = false
+
+        // After tests complete, play demo automatically
+        await sleep(800)
+        await runDemoPlayback()
       }
     }
 
@@ -2319,13 +2322,9 @@ body {
       el.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }))
     }
 
-    async function runAllDemos() {
+    async function runDemoPlayback() {
       if (demoRunning) return
       demoRunning = true
-
-      const runDemoBtn = document.getElementById('run-all-demos')
-      runDemoBtn.disabled = true
-      runDemoBtn.textContent = '⏸ Running...'
 
       try {
         // ========== EXHIBIT 1: Theme Switcher ==========
@@ -2448,42 +2447,16 @@ body {
         await simulateClick(resetBtn)
         await sleep(400)
 
-        // ========== TEST RUNNER ==========
-        const testRunner = document.querySelector('.test-runner')
-        scrollToElement(testRunner)
-        highlightElement(testRunner)
-        await sleep(500)
-
-        // Run tests
-        const runTestsBtn = document.getElementById('run-tests')
-        highlightElement(runTestsBtn)
-        await simulateClick(runTestsBtn)
-
-        // Wait for tests to complete
-        await new Promise(resolve => {
-          const checkInterval = setInterval(() => {
-            if (!runTestsBtn.disabled) {
-              clearInterval(checkInterval)
-              resolve()
-            }
-          }, 100)
-        })
-
-        await sleep(500)
-
         // Scroll back to top
         window.scrollTo({ top: 0, behavior: 'smooth' })
         await sleep(500)
 
       } finally {
         demoRunning = false
-        runDemoBtn.disabled = false
-        runDemoBtn.textContent = '▶ Watch Demo'
       }
     }
 
     // Button handlers
-    document.getElementById('run-all-demos').addEventListener('click', runAllDemos)
     document.getElementById('reset-page').addEventListener('click', () => location.reload())
 
     // ============================================
