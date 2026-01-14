@@ -18,7 +18,7 @@ import type { Theme, ThemeManager } from './types'
 // ============================================
 
 const THOROUGH_MODE = process.env.FUZZ_THOROUGH === '1'
-const THOROUGH_DURATION_MS = 5_000 // 5 seconds per test for reasonable total runtime
+const THOROUGH_DURATION_MS = 10_000 // 10 seconds per test for reasonable total runtime
 const STANDARD_ITERATIONS = 100
 const BASE_SEED = 12345
 
