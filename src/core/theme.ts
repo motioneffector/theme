@@ -63,6 +63,11 @@ export function createTheme(options: { name: string; tokens: Record<string, stri
       throw new TypeError('Token name cannot be an empty string')
     }
 
+    // Check for __proto__ which enables prototype pollution
+    if (tokenName === '__proto__') {
+      throw new TypeError(`Token name cannot be "__proto__" (prototype pollution risk)`)
+    }
+
     // Check for spaces
     if (tokenName.includes(' ')) {
       throw new TypeError(`Token name cannot contain spaces: "${tokenName}"`)

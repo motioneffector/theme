@@ -1365,3 +1365,66 @@ describe('Callback Argument Details', () => {
     expect(previousTheme.name).toBe('dark')
   })
 })
+
+describe('Security: storage key validation', () => {
+  it('handles storage key with special characters', () => {
+    const themes = createSimpleThemes()
+
+    expect(() =>
+      createThemeManager({
+        themes,
+        storageKey: 'app:theme:v1',
+        target: null,
+      })
+    ).not.toThrow()
+  })
+
+  it('handles very long storage keys', () => {
+    const themes = createSimpleThemes()
+    const longKey = 'theme-' + 'x'.repeat(1000)
+
+    expect(() =>
+      createThemeManager({
+        themes,
+        storageKey: longKey,
+        target: null,
+      })
+    ).not.toThrow()
+  })
+
+  it('handles unicode in storage keys', () => {
+    const themes = createSimpleThemes()
+
+    expect(() =>
+      createThemeManager({
+        themes,
+        storageKey: 'theme-🎨-中文',
+        target: null,
+      })
+    ).not.toThrow()
+  })
+
+  it('applies theme name from storage without executing code', () => {
+    const themes = [
+      ...createSimpleThemes(),
+      createTestTheme('constructor'),
+      createTestTheme('toString'),
+      createTestTheme('__proto__'),
+    ]
+
+    // Test that theme names that match Object.prototype properties work safely
+    const manager1 = createThemeManager({
+      themes,
+      storageKey: 'test-constructor',
+      target: null,
+    })
+    expect(manager1.apply('constructor')).toBeDefined()
+
+    const manager2 = createThemeManager({
+      themes,
+      storageKey: 'test-toString',
+      target: null,
+    })
+    expect(manager2.apply('toString')).toBeDefined()
+  })
+})

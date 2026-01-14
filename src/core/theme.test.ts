@@ -356,3 +356,199 @@ describe('Plain Object Themes (No Helper)', () => {
     expect(Object.isFrozen(plainTheme.tokens)).toBe(false)
   })
 })
+
+describe('Security: prototype pollution prevention', () => {
+  it('rejects __proto__ as token name', () => {
+    // JSON.parse creates __proto__ as an own property
+    const maliciousTokens = JSON.parse('{"__proto__": "polluted", "color": "red"}')
+
+    expect(() =>
+      createTheme({
+        name: 'malicious',
+        tokens: maliciousTokens,
+      })
+    ).toThrow(TypeError)
+    expect(() =>
+      createTheme({
+        name: 'malicious',
+        tokens: maliciousTokens,
+      })
+    ).toThrow(/__proto__/)
+  })
+
+  it('allows constructor as token name (safe - only shadows inherited property)', () => {
+    // constructor as a direct property is safe - it just shadows the inherited property
+    const theme = createTheme({
+      name: 'test',
+      tokens: { constructor: 'red' },
+    })
+
+    expect(theme.tokens.constructor).toBe('red')
+    // Verify no pollution occurred
+    expect(({} as Record<string, unknown>).constructor).not.toBe('red')
+  })
+
+  it('allows prototype as token name (safe - only shadows inherited property)', () => {
+    // prototype as a direct property is safe
+    const theme = createTheme({
+      name: 'test',
+      tokens: { prototype: 'blue' },
+    })
+
+    expect(theme.tokens.prototype).toBe('blue')
+    // Verify no pollution occurred
+    expect(({} as Record<string, unknown>).prototype).toBeUndefined()
+  })
+
+  it('prevents prototype pollution via JSON.parse with __proto__', () => {
+    // JSON.parse can create __proto__ keys which enable prototype pollution
+    const maliciousTokens = JSON.parse('{"__proto__": {"polluted": true}, "color": "red"}')
+
+    expect(() =>
+      createTheme({
+        name: 'malicious',
+        tokens: maliciousTokens,
+      })
+    ).toThrow(TypeError)
+  })
+
+  it('verifies that __proto__ prototype pollution attempt does not succeed', () => {
+    // Ensure the global Object prototype is not polluted
+    const beforePolluted = ({} as Record<string, unknown>).polluted
+
+    try {
+      const maliciousTokens = JSON.parse('{"__proto__": {"polluted": true}, "color": "red"}')
+      createTheme({
+        name: 'malicious',
+        tokens: maliciousTokens,
+      })
+    } catch {
+      // Expected to throw
+    }
+
+    const afterPolluted = ({} as Record<string, unknown>).polluted
+    expect(beforePolluted).toBeUndefined()
+    expect(afterPolluted).toBeUndefined()
+  })
+
+  it('multiple attempts to pollute via __proto__ are all blocked', () => {
+    const attempts = [
+      JSON.parse('{"__proto__": {"polluted1": true}}'),
+      JSON.parse('{"__proto__": {"polluted2": true}, "color": "red"}'),
+    ]
+
+    for (const maliciousTokens of attempts) {
+      expect(() =>
+        createTheme({
+          name: 'malicious',
+          tokens: maliciousTokens,
+        })
+      ).toThrow(TypeError)
+    }
+
+    // Verify no pollution occurred from any attempt
+    expect(({} as Record<string, unknown>).polluted1).toBeUndefined()
+    expect(({} as Record<string, unknown>).polluted2).toBeUndefined()
+  })
+})
+
+describe('Security: input validation hardening', () => {
+  it('handles null bytes in theme name', () => {
+    // Null bytes should not cause issues (they get trimmed away or rejected)
+    expect(() =>
+      createTheme({
+        name: 'valid\x00malicious',
+        tokens: { color: 'red' },
+      })
+    ).not.toThrow()
+  })
+
+  it('handles null bytes in token values', () => {
+    expect(() =>
+      createTheme({
+        name: 'test',
+        tokens: { color: 'red\x00blue' },
+      })
+    ).not.toThrow()
+  })
+
+  it('handles extremely long theme names', () => {
+    const longName = 'a'.repeat(10_000)
+
+    expect(() =>
+      createTheme({
+        name: longName,
+        tokens: { color: 'red' },
+      })
+    ).not.toThrow()
+  })
+
+  it('handles extremely long token values', () => {
+    const longValue = 'x'.repeat(100_000)
+
+    expect(() =>
+      createTheme({
+        name: 'test',
+        tokens: { color: longValue },
+      })
+    ).not.toThrow()
+  })
+
+  it('handles unicode edge cases in theme name', () => {
+    // Surrogate pairs, RTL override, zero-width chars
+    const edgeCases = ['\uD800\uDC00', '\u202E', '\u200B', '🎨', '\uFEFF']
+
+    for (const input of edgeCases) {
+      expect(() =>
+        createTheme({
+          name: `theme${input}`,
+          tokens: { color: 'red' },
+        })
+      ).not.toThrow()
+    }
+  })
+
+  it('handles unicode edge cases in token names', () => {
+    const theme = createTheme({
+      name: 'test',
+      tokens: {
+        'emoji🎨': 'red',
+        中文: 'blue',
+      },
+    })
+
+    expect(theme.tokens['emoji🎨']).toBe('red')
+    expect(theme.tokens['中文']).toBe('blue')
+  })
+
+  it('handles unicode edge cases in token values', () => {
+    const edgeCases = ['\uD800\uDC00', '\u202E', '\u200B', '🎨', '\uFEFF']
+
+    for (const input of edgeCases) {
+      expect(() =>
+        createTheme({
+          name: 'test',
+          tokens: { color: `value${input}` },
+        })
+      ).not.toThrow()
+    }
+  })
+
+  it('token values with potential CSS injection patterns are accepted', () => {
+    // These are legitimate CSS values, not XSS vectors when used with CSS variables
+    const theme = createTheme({
+      name: 'test',
+      tokens: {
+        gradient: 'linear-gradient(to right, red, blue)',
+        image: 'url(data:image/svg+xml,<svg>...</svg>)',
+        calc: 'calc(100% - 20px)',
+        complex: 'rgb(255, 0, 0) url("bg.png") no-repeat',
+      },
+    })
+
+    expect(theme.tokens.gradient).toBe('linear-gradient(to right, red, blue)')
+    expect(theme.tokens.image).toBe('url(data:image/svg+xml,<svg>...</svg>)')
+    expect(theme.tokens.calc).toBe('calc(100% - 20px)')
+    expect(theme.tokens.complex).toBe('rgb(255, 0, 0) url("bg.png") no-repeat')
+  })
+})
