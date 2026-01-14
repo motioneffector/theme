@@ -67,6 +67,57 @@ describe('Token Access Utilities', () => {
     })
   })
 
+  describe('Security: prototype pollution prevention in getToken()', () => {
+    it('returns undefined for __proto__ token name (blocked)', () => {
+      const themes = [createTestTheme('light', { primary: '#000' })]
+      const manager = createThemeManager({ themes, target: null })
+
+      expect(manager.getToken('__proto__')).toBeUndefined()
+    })
+
+    it('can access constructor token if it exists (safe)', () => {
+      const themes = [createTestTheme('light', { constructor: '#000', primary: '#111' })]
+      const manager = createThemeManager({ themes, target: null })
+
+      // constructor as a token name is safe - it just shadows the inherited property
+      expect(manager.getToken('constructor')).toBe('#000')
+    })
+
+    it('can access prototype token if it exists (safe)', () => {
+      const themes = [createTestTheme('light', { prototype: '#222', primary: '#111' })]
+      const manager = createThemeManager({ themes, target: null })
+
+      // prototype as a token name is safe
+      expect(manager.getToken('prototype')).toBe('#222')
+    })
+
+    it('cannot access inherited Object.prototype properties', () => {
+      const themes = [createTestTheme('light', { primary: '#000' })]
+      const manager = createThemeManager({ themes, target: null })
+
+      // Attempting to access inherited properties should return undefined
+      // These are not defined as tokens, so they shouldn't be accessible
+      expect(manager.getToken('toString')).toBeUndefined()
+      expect(manager.getToken('valueOf')).toBeUndefined()
+      expect(manager.getToken('hasOwnProperty')).toBeUndefined()
+    })
+
+    it('verifies __proto__ access via getToken does not pollute', () => {
+      const themes = [createTestTheme('light', { primary: '#000' })]
+      const manager = createThemeManager({ themes, target: null })
+
+      const beforePolluted = ({} as Record<string, unknown>).polluted
+
+      // Attempt to access __proto__ via getToken
+      const result = manager.getToken('__proto__')
+      expect(result).toBeUndefined()
+
+      const afterPolluted = ({} as Record<string, unknown>).polluted
+      expect(beforePolluted).toBeUndefined()
+      expect(afterPolluted).toBeUndefined()
+    })
+  })
+
   describe('manager.getAllTokens()', () => {
     it('returns all tokens from active theme as object', () => {
       const themes = [

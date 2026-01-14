@@ -459,6 +459,13 @@ export function createThemeManager(options: ThemeManagerOptions): ThemeManager {
       if (disposed) {
         return undefined
       }
+
+      // Prevent prototype pollution via __proto__ access
+      // Use hasOwn to avoid accessing inherited properties
+      if (tokenName === '__proto__' || !Object.hasOwn(currentTheme.tokens, tokenName)) {
+        return undefined
+      }
+
       return currentTheme.tokens[tokenName]
     },
 
