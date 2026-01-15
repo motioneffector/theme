@@ -5,1464 +5,2471 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@motioneffector/theme - Demo</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+/* ============================================
+   RESET & BASE
+   ============================================ */
 
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      line-height: 1.6;
-      background: var(--color-background, #ffffff);
-      color: var(--color-text, #1a1a1a);
-      transition: background 0.3s, color 0.3s;
-    }
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    h1 {
-      border-bottom: 3px solid var(--color-primary, #3b82f6);
-      padding-bottom: 10px;
-    }
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-    section {
-      margin: 20px 0;
-      padding: 20px;
-      border: 1px solid var(--color-border, #ddd);
-      border-radius: 8px;
-      background: var(--color-surface, #f9f9f9);
-      transition: background 0.3s, border-color 0.3s;
-    }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--theme-text);
+  background: var(--theme-bg);
+  min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
 
-    .test-pass {
-      color: #22c55e;
-      font-weight: 500;
-    }
+/* ============================================
+   CSS VARIABLES (defaults, overridden by theme)
+   ============================================ */
 
-    .test-fail {
-      color: #ef4444;
-      font-weight: bold;
-    }
+:root {
+  /* Theme-controlled variables (set by library) */
+  --theme-bg: #0d1117;
+  --theme-bg-secondary: #161b22;
+  --theme-bg-tertiary: #21262d;
+  --theme-text: #e6edf3;
+  --theme-text-secondary: #8b949e;
+  --theme-border: #30363d;
+  --theme-primary: #1f6feb;
+  --theme-accent: #58a6ff;
 
-    .test-output {
-      background: var(--color-code-bg, #f5f5f5);
-      color: var(--color-text, #1a1a1a);
-      padding: 15px;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      white-space: pre-wrap;
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid var(--color-border, #ddd);
-      border-radius: 4px;
-      margin-top: 10px;
-    }
+  /* Static variables */
+  --bg-hover: #30363d;
+  --text-muted: #6e7681;
+  --accent-blue: #1f6feb;
+  --accent-blue-hover: #388bfd;
+  --accent-green: #238636;
+  --accent-green-bright: #3fb950;
+  --accent-red: #da3633;
+  --accent-red-bright: #f85149;
+  --accent-yellow: #d29922;
+  --accent-yellow-bright: #e3b341;
+  --accent-purple: #8957e5;
 
-    button {
-      padding: 10px 18px;
-      margin: 4px;
-      cursor: pointer;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
-      background: var(--color-primary, #3b82f6);
-      color: white;
-    }
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
 
-    button:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
 
-    button:active {
-      transform: translateY(0);
-    }
+  /* Typography */
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-xxl: 2rem;
 
-    .run-all {
-      background: #22c55e;
-      color: white;
-      font-size: 16px;
-      padding: 14px 28px;
-      font-weight: 600;
-    }
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
 
-    .clear-btn {
-      background: #64748b;
-    }
+  /* Transitions */
+  --transition-fast: 0.1s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
 
-    .summary {
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 4px;
-      background: var(--color-surface, #f0f0f0);
-    }
+/* ============================================
+   LAYOUT
+   ============================================ */
 
-    input[type="text"],
-    input[type="color"] {
-      padding: 8px 12px;
-      margin: 4px;
-      border: 1px solid var(--color-border, #ddd);
-      border-radius: 4px;
-      font-size: 14px;
-      background: var(--color-background, #fff);
-      color: var(--color-text, #1a1a1a);
-    }
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-xl);
+}
 
-    .theme-button {
-      min-width: 100px;
-    }
+/* ============================================
+   HEADER
+   ============================================ */
 
-    .color-preview {
-      display: inline-block;
-      width: 100px;
-      height: 30px;
-      border: 1px solid var(--color-border, #ddd);
-      border-radius: 4px;
-      margin: 4px;
-    }
+.header {
+  margin-bottom: var(--space-xxl);
+  padding-bottom: var(--space-xl);
+  border-bottom: 1px solid var(--theme-border);
+  transition: border-color 0.2s ease;
+}
 
-    .token-display {
-      background: var(--color-code-bg, #f5f5f5);
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 12px;
-    }
+.header-title {
+  font-size: var(--font-size-xxl);
+  font-weight: 600;
+  color: var(--theme-text);
+  margin-bottom: var(--space-sm);
+  transition: color 0.2s ease;
+}
 
-    .info-box {
-      background: var(--color-surface, #dbeafe);
-      border-left: 4px solid var(--color-primary, #3b82f6);
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 4px;
-      color: var(--color-text, #1a1a1a);
-    }
+.header-description {
+  font-size: var(--font-size-lg);
+  color: var(--theme-text-secondary);
+  margin-bottom: var(--space-lg);
+  transition: color 0.2s ease;
+}
 
-    .demo-card {
-      background: var(--color-surface, #fff);
-      border: 2px solid var(--color-primary, #3b82f6);
-      border-radius: 8px;
-      padding: 16px;
-      margin: 10px 0;
-      color: var(--color-text, #1a1a1a);
-    }
+.header-links {
+  display: flex;
+  gap: var(--space-md);
+}
 
-    .demo-card h3 {
-      margin-top: 0;
-      color: var(--color-primary, #3b82f6);
-    }
+.header-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--theme-accent);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast), color 0.2s ease;
+}
 
-    #currentThemeDisplay {
-      font-size: 20px;
-      font-weight: bold;
-      color: var(--color-primary, #3b82f6);
-      padding: 10px;
-      border-radius: 4px;
-      background: var(--color-surface, #f0f0f0);
-      margin: 10px 0;
-    }
+.header-link:hover {
+  background: var(--theme-bg-tertiary);
+  text-decoration: underline;
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+.header-actions .btn {
+  font-size: var(--font-size-md);
+  padding: var(--space-sm) var(--space-lg);
+}
+
+/* Demo automation highlight */
+.demo-highlight {
+  outline: 3px solid var(--accent-yellow-bright) !important;
+  outline-offset: 2px;
+  animation: demo-pulse 0.5s ease-in-out;
+}
+
+@keyframes demo-pulse {
+  0%, 100% { outline-color: var(--accent-yellow-bright); }
+  50% { outline-color: var(--accent-yellow); }
+}
+
+.demo-active-btn {
+  animation: demo-click 0.3s ease;
+}
+
+@keyframes demo-click {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+}
+
+/* ============================================
+   EXHIBITS
+   ============================================ */
+
+.exhibits {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxl);
+}
+
+.exhibit {
+  background: var(--theme-bg-secondary);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.exhibit-header {
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--theme-border);
+  transition: border-color 0.2s ease;
+}
+
+.exhibit-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--theme-text);
+  margin-bottom: var(--space-xs);
+  transition: color 0.2s ease;
+}
+
+.exhibit-description {
+  font-size: var(--font-size-md);
+  color: var(--theme-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.exhibit-content {
+  padding: var(--space-lg);
+}
+
+.exhibit-interactive {
+  background: var(--theme-bg);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg);
+  min-height: 200px;
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.exhibit-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--theme-bg-tertiary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+  transition: background-color 0.2s ease;
+}
+
+.exhibit-state {
+  padding: var(--space-md);
+  background: var(--theme-bg);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.exhibit-state-title {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-sm);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--theme-primary);
+  color: white;
+  border-color: var(--theme-primary);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.btn-secondary {
+  background: var(--theme-bg-tertiary);
+  color: var(--theme-text);
+  border-color: var(--theme-border);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.btn-danger {
+  background: var(--accent-red);
+  color: white;
+  border-color: var(--accent-red);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--accent-red-bright);
+}
+
+.btn-success {
+  background: var(--accent-green);
+  color: white;
+  border-color: var(--accent-green);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: var(--accent-green-bright);
+}
+
+.btn-small {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+}
+
+/* ============================================
+   INPUTS
+   ============================================ */
+
+.input {
+  background: var(--theme-bg);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--theme-text);
+  transition: border-color var(--transition-fast), background-color 0.2s ease, color 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--theme-primary);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.input-mono {
+  font-family: var(--font-mono);
+}
+
+/* ============================================
+   THEME SWITCHER STYLES
+   ============================================ */
+
+.theme-buttons {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.theme-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-md);
+  background: var(--theme-bg);
+  border: 2px solid var(--theme-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.theme-btn:hover {
+  border-color: var(--theme-text-secondary);
+}
+
+.theme-btn.active {
+  border-color: var(--theme-primary);
+  box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.3);
+}
+
+.theme-btn-swatches {
+  display: flex;
+  gap: 4px;
+  margin-bottom: var(--space-sm);
+}
+
+.theme-btn-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.theme-btn-label {
+  font-size: var(--font-size-sm);
+  color: var(--theme-text);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.status-row {
+  display: flex;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.status-box {
+  background: var(--theme-bg);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  min-width: 200px;
+  transition: all 0.2s ease;
+}
+
+.status-box-title {
+  font-size: var(--font-size-xs);
+  color: var(--theme-text-secondary);
+  margin-bottom: var(--space-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.status-box-value {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--theme-text);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--theme-bg-tertiary);
+  border-radius: var(--radius-sm);
+  transition: all 0.3s ease;
+}
+
+.status-box-value.empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.system-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.system-indicator-icon {
+  font-size: var(--font-size-lg);
+  transition: transform 0.3s ease;
+}
+
+.system-following {
+  position: relative;
+}
+
+.system-following::before {
+  content: '';
+  position: absolute;
+  left: -30px;
+  top: 50%;
+  width: 20px;
+  height: 2px;
+  background: var(--theme-primary);
+  animation: pulse-line 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-line {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ============================================
+   TOKEN TRACER STYLES
+   ============================================ */
+
+.token-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-md);
+}
+
+.token-card {
+  background: var(--theme-bg-secondary);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.token-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.token-card-swatch {
+  width: 100%;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-sm);
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: background-color 0.2s ease;
+}
+
+.token-card-name {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--theme-text);
+  margin-bottom: var(--space-xs);
+  transition: color 0.2s ease;
+}
+
+.token-card-value {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--theme-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.token-card-count {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  background: var(--theme-primary);
+  color: white;
+  font-size: var(--font-size-xs);
+  padding: 2px 6px;
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.token-card:hover .token-card-count {
+  opacity: 1;
+}
+
+.token-card-copied {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--accent-green);
+  color: white;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.token-card-copied.show {
+  opacity: 1;
+}
+
+/* Glow effect for traced elements */
+.token-trace-glow {
+  outline: 3px solid var(--trace-color, #1f6feb) !important;
+  outline-offset: 2px;
+  animation: glow-pulse 1s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { outline-color: var(--trace-color, #1f6feb); }
+  50% { outline-color: color-mix(in srgb, var(--trace-color, #1f6feb) 60%, transparent); }
+}
+
+/* ============================================
+   THEME PAINTER STYLES
+   ============================================ */
+
+.painter-section {
+  margin-bottom: var(--space-lg);
+}
+
+.painter-section-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--theme-text-secondary);
+  margin-bottom: var(--space-md);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.preset-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--theme-bg);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preset-btn:hover {
+  border-color: var(--theme-text-secondary);
+  transform: translateY(-1px);
+}
+
+.preset-btn-swatches {
+  display: flex;
+  gap: 2px;
+  margin-bottom: var(--space-xs);
+}
+
+.preset-btn-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.preset-btn-label {
+  font-size: var(--font-size-xs);
+  color: var(--theme-text);
+}
+
+.color-pickers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-md);
+}
+
+.color-picker-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.color-picker-label {
+  font-size: var(--font-size-sm);
+  color: var(--theme-text);
+  min-width: 100px;
+}
+
+.color-picker-input {
+  width: 60px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: var(--theme-bg);
+}
+
+.color-picker-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-picker-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 2px;
+}
+
+.painter-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+.theme-name-input {
+  flex: 1;
+  max-width: 250px;
+}
+
+.registered-themes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.registered-theme {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--theme-bg);
+  border: 2px solid var(--theme-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.registered-theme:hover {
+  border-color: var(--theme-text-secondary);
+}
+
+.registered-theme.active {
+  border-color: var(--theme-primary);
+}
+
+.registered-theme-swatches {
+  display: flex;
+  gap: 3px;
+  margin-bottom: var(--space-xs);
+}
+
+.registered-theme-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.registered-theme-name {
+  font-size: var(--font-size-xs);
+  color: var(--theme-text);
+}
+
+.registered-theme-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  background: var(--accent-red);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.registered-theme:hover .registered-theme-remove {
+  opacity: 1;
+}
+
+.registered-theme-remove:hover {
+  background: var(--accent-red-bright);
+}
+
+/* ============================================
+   TEST RUNNER
+   ============================================ */
+
+.test-runner {
+  margin-top: var(--space-xxl);
+  background: var(--theme-bg-secondary);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.test-runner-header {
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--theme-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color 0.2s ease;
+}
+
+.test-runner-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--theme-text);
+  transition: color 0.2s ease;
+}
+
+.test-runner-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.test-runner-content {
+  padding: var(--space-lg);
+}
+
+.test-progress {
+  margin-bottom: var(--space-lg);
+}
+
+.test-progress-bar {
+  height: 8px;
+  background: var(--theme-bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: var(--space-sm);
+  transition: background-color 0.2s ease;
+}
+
+.test-progress-fill {
+  height: 100%;
+  background: var(--theme-primary);
+  border-radius: 4px;
+  transition: width var(--transition-fast), background-color 0.2s ease;
+  width: 0%;
+}
+
+.test-progress-fill.success {
+  background: var(--accent-green);
+}
+
+.test-progress-fill.failure {
+  background: var(--accent-red);
+}
+
+.test-progress-text {
+  font-size: var(--font-size-sm);
+  color: var(--theme-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.test-output {
+  background: var(--theme-bg);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md);
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.test-output-empty {
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.test-item {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--theme-border);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  transition: border-color 0.2s ease;
+}
+
+.test-item:last-child {
+  border-bottom: none;
+}
+
+.test-icon {
+  flex-shrink: 0;
+  font-size: var(--font-size-md);
+}
+
+.test-icon.pass {
+  color: var(--accent-green-bright);
+}
+
+.test-icon.fail {
+  color: var(--accent-red-bright);
+}
+
+.test-name {
+  color: var(--theme-text);
+  transition: color 0.2s ease;
+}
+
+.test-error {
+  color: var(--accent-red-bright);
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-xs);
+}
+
+.test-summary {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--theme-bg-tertiary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  display: flex;
+  gap: var(--space-lg);
+  transition: background-color 0.2s ease;
+}
+
+.test-summary-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.test-summary-item.passed {
+  color: var(--accent-green-bright);
+}
+
+.test-summary-item.failed {
+  color: var(--accent-red-bright);
+}
+
+.test-summary-item.skipped {
+  color: var(--text-muted);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.text-primary { color: var(--theme-text); }
+.text-secondary { color: var(--theme-text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-success { color: var(--accent-green-bright); }
+.text-error { color: var(--accent-red-bright); }
+.text-warning { color: var(--accent-yellow-bright); }
+
+.font-mono { font-family: var(--font-mono); }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-xs { gap: var(--space-xs); }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
+.mb-sm { margin-bottom: var(--space-sm); }
+.mb-md { margin-bottom: var(--space-md); }
+.mb-lg { margin-bottom: var(--space-lg); }
+
+.hidden { display: none !important; }
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--theme-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-hover);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-border);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .page {
+    padding: var(--space-md);
+  }
+
+  .theme-buttons {
+    flex-direction: column;
+  }
+
+  .theme-btn {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--space-md);
+  }
+
+  .theme-btn-swatches {
+    margin-bottom: 0;
+  }
+
+  .status-row {
+    flex-direction: column;
+  }
+
+  .token-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .color-pickers {
+    grid-template-columns: 1fr;
+  }
+}
   </style>
 </head>
 <body>
-  <h1>@motioneffector/theme Demo</h1>
+  <div class="page">
+    <header class="header">
+      <h1 class="header-title">@motioneffector/theme</h1>
+      <p class="header-description">Type-safe theme management with CSS variables, runtime switching, and automatic persistence</p>
+      <nav class="header-links">
+        <a href="https://www.npmjs.com/package/@motioneffector/theme" class="header-link" target="_blank">
+          📦 npm
+        </a>
+        <a href="https://github.com/motioneffector/theme" class="header-link" target="_blank">
+          💻 GitHub
+        </a>
+        <a href="https://github.com/motioneffector/theme/wiki" class="header-link" target="_blank">
+          📖 Manual
+        </a>
+      </nav>
+      <div class="header-actions">
+        <button class="btn btn-secondary" id="reset-page">↻ Reset Page</button>
+      </div>
+    </header>
 
-  <div class="info-box">
-    <strong>About this library:</strong> A TypeScript library for managing CSS variable-based theming.
-    This page demonstrates all major features and includes automated tests.
+    <main class="exhibits">
+      <!-- Exhibit 1: Live Theme Switcher -->
+      <section class="exhibit">
+        <div class="exhibit-header">
+          <h2 class="exhibit-title">Live Theme Switcher</h2>
+          <p class="exhibit-description">Switch themes and watch the entire page transform. The page itself is styled using the library's CSS variables.</p>
+        </div>
+        <div class="exhibit-content">
+          <div class="exhibit-interactive" id="exhibit-1">
+            <div class="theme-buttons" id="theme-buttons">
+              <!-- Theme buttons rendered by JS -->
+            </div>
+
+            <div class="status-row">
+              <div class="status-box">
+                <div class="status-box-title">💾 localStorage</div>
+                <div class="status-box-value" id="storage-value">(empty)</div>
+              </div>
+
+              <div class="status-box">
+                <div class="status-box-title">System Preference</div>
+                <div class="system-indicator">
+                  <span class="system-indicator-icon" id="system-icon">☀</span>
+                  <span id="system-label">Light</span>
+                </div>
+              </div>
+
+              <div class="status-box" id="following-box" class="hidden">
+                <div class="status-box-title">Mode</div>
+                <div id="mode-label">Manual</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="exhibit-controls">
+            <button class="btn btn-secondary" id="clear-storage">Clear Storage</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Exhibit 2: Token Tracer -->
+      <section class="exhibit">
+        <div class="exhibit-header">
+          <h2 class="exhibit-title">Token Tracer</h2>
+          <p class="exhibit-description">Hover over any token to see which elements on the page use it. Click to copy the CSS variable.</p>
+        </div>
+        <div class="exhibit-content">
+          <div class="exhibit-interactive" id="exhibit-2">
+            <div class="token-grid" id="token-grid">
+              <!-- Token cards rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Exhibit 3: Theme Painter -->
+      <section class="exhibit">
+        <div class="exhibit-header">
+          <h2 class="exhibit-title">Theme Painter</h2>
+          <p class="exhibit-description">Create custom themes by painting directly on the page. Click presets or drag color pickers.</p>
+        </div>
+        <div class="exhibit-content">
+          <div class="exhibit-interactive" id="exhibit-3">
+            <div class="painter-section">
+              <div class="painter-section-title">Presets (click to apply)</div>
+              <div class="preset-buttons" id="preset-buttons">
+                <!-- Preset buttons rendered by JS -->
+              </div>
+            </div>
+
+            <div class="painter-section">
+              <div class="painter-section-title">Customize</div>
+              <div class="color-pickers" id="color-pickers">
+                <!-- Color pickers rendered by JS -->
+              </div>
+            </div>
+
+            <div class="painter-actions">
+              <input type="text" class="input theme-name-input" id="theme-name" placeholder="my-custom-theme" value="my-custom-theme">
+              <button class="btn btn-primary" id="save-theme">💾 Save Theme</button>
+              <button class="btn btn-secondary" id="reset-theme">↩ Reset</button>
+            </div>
+
+            <div class="painter-section mt-lg">
+              <div class="painter-section-title">Registered Themes</div>
+              <div class="registered-themes" id="registered-themes">
+                <!-- Registered themes rendered by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="test-runner">
+      <div class="test-runner-header">
+        <h2 class="test-runner-title">Test Suite</h2>
+        <div class="test-runner-actions">
+          <button class="btn btn-primary" id="run-tests">Run Tests</button>
+        </div>
+      </div>
+      <div class="test-runner-content">
+        <div class="test-progress">
+          <div class="test-progress-bar">
+            <div class="test-progress-fill" id="progress-fill"></div>
+          </div>
+          <div class="test-progress-text" id="progress-text">Ready to run tests</div>
+        </div>
+        <div class="test-output" id="test-output">
+          <div class="test-output-empty">Click "Run Tests" to execute the test suite</div>
+        </div>
+        <div class="test-summary hidden" id="test-summary">
+          <div class="test-summary-item passed">
+            <span>✓</span>
+            <span id="passed-count">0</span> passed
+          </div>
+          <div class="test-summary-item failed">
+            <span>✗</span>
+            <span id="failed-count">0</span> failed
+          </div>
+          <div class="test-summary-item skipped">
+            <span>○</span>
+            <span id="skipped-count">0</span> skipped
+          </div>
+        </div>
+      </div>
+    </footer>
   </div>
 
-  <section id="test-runner">
-    <h2>🧪 Automated Tests</h2>
-    <p>Click "Run All Tests" to execute comprehensive automated tests covering all library features.</p>
-    <button class="run-all" onclick="runAllTests()">▶ Run All Tests</button>
-    <button class="clear-btn" onclick="clearResults()">Clear Results</button>
-    <div class="summary" id="summary"></div>
-    <div class="test-output" id="test-output"></div>
-  </section>
-
-  <section>
-    <h2>🎨 Interactive: Theme Switching</h2>
-    <p>Click buttons to switch between themes. Watch the page colors change!</p>
-    <div id="currentThemeDisplay">Current: light</div>
-    <button class="theme-button" onclick="switchToLight()">☀️ Light Theme</button>
-    <button class="theme-button" onclick="switchToDark()">🌙 Dark Theme</button>
-    <button class="theme-button" onclick="switchToSolarized()">🌅 Solarized Theme</button>
-    <button class="theme-button" onclick="switchToHighContrast()">⚡ High Contrast</button>
-  </section>
-
-  <section>
-    <h2>🔧 Interactive: Create & Register Theme</h2>
-    <p>Create a custom theme with your own colors and register it:</p>
-    <div>
-      <input type="text" id="customThemeName" placeholder="Theme name" value="custom">
-      <label>Primary: <input type="color" id="customPrimary" value="#9333ea"></label>
-      <label>Background: <input type="color" id="customBackground" value="#faf5ff"></label>
-      <label>Text: <input type="color" id="customText" value="#1a1a1a"></label>
-      <button onclick="registerCustomTheme()">Register Custom Theme</button>
-      <button onclick="applyCustomTheme()">Apply Custom Theme</button>
-    </div>
-    <div id="customThemeOutput"></div>
-  </section>
-
-  <section>
-    <h2>📋 Interactive: Available Themes</h2>
-    <p>List all registered themes:</p>
-    <button onclick="listThemes()">List All Themes</button>
-    <div id="themeList" class="token-display"></div>
-  </section>
-
-  <section>
-    <h2>🔍 Interactive: Token Inspector</h2>
-    <p>View current theme tokens and CSS variable names:</p>
-    <button onclick="showAllTokens()">Show All Tokens</button>
-    <button onclick="showCSSVariables()">Show CSS Variable Names</button>
-    <div id="tokenOutput" class="token-display"></div>
-  </section>
-
-  <section>
-    <h2>🌓 Interactive: System Preference</h2>
-    <p>Detect and respond to system color scheme preference:</p>
-    <button onclick="checkSystemPreference()">Check System Preference</button>
-    <button onclick="applySystemTheme()">Apply System Theme</button>
-    <button onclick="watchSystemToggle()">Toggle Watch System</button>
-    <div id="systemOutput"></div>
-  </section>
-
-  <section>
-    <h2>🎭 Visual Demo Card</h2>
-    <p>This card uses CSS variables from the current theme:</p>
-    <div class="demo-card">
-      <h3>Demo Component</h3>
-      <p>This card's colors automatically update when you switch themes.</p>
-      <button>Primary Button</button>
-      <p style="color: var(--color-text-muted, #666);">Muted text color</p>
-    </div>
-  </section>
-
-  <script>
+  <script type="module">
     // ============================================
-    // INLINED LIBRARY CODE (from dist/index.js)
+    // INLINE THEME LIBRARY (simplified for demo)
     // ============================================
 
-    // Minified library code - adapted for inline use
-    function camelToKebab(r) {
-      return r.replace(/[A-Z]/g, (t, i) => (i > 0 ? "-" : "") + t.toLowerCase());
-    }
-
-    function cloneTheme(r) {
-      return {
-        name: r.name,
-        tokens: { ...r.tokens }
-      };
-    }
-
-    function validateTheme(r) {
-      if (r == null || typeof r != "object")
-        throw new TypeError("Theme must be a valid object");
-      const t = r;
-      if (typeof t.name != "string" || t.name === "")
-        throw new TypeError("Theme must have a non-empty name property");
-      if (t.tokens === null || t.tokens === void 0 || typeof t.tokens != "object" || Array.isArray(t.tokens))
-        throw new TypeError("Theme must have a tokens property");
-      const i = t.tokens;
-      if (Object.keys(i).length === 0)
-        throw new TypeError("Cannot create theme: tokens object cannot be empty");
-    }
-
-    function createTheme(r) {
-      if (r.name === void 0)
-        throw new TypeError("Theme name is required");
-      if (r.name === null)
-        throw new TypeError("Theme name cannot be null");
-      const t = r.name.trim();
-      if (t === "")
-        throw new TypeError("Theme name cannot be empty or whitespace-only");
-      if (r.tokens === void 0)
-        throw new TypeError("Theme tokens are required");
-      if (r.tokens === null)
-        throw new TypeError("Theme tokens cannot be null");
-      if (typeof r.tokens != "object" || Array.isArray(r.tokens))
-        throw new TypeError("Theme tokens must be an object");
-      const i = Object.keys(r.tokens);
-      if (i.length === 0)
-        throw new TypeError("Theme tokens cannot be empty");
-      for (const f of i) {
-        if (f === "")
-          throw new TypeError("Token name cannot be an empty string");
-        if (f.includes(" "))
-          throw new TypeError(`Token name cannot contain spaces: "${f}"`);
-        if (f.includes("-"))
-          throw new TypeError(`Token name cannot contain hyphens: "${f}"`);
-        if (/^\d/.test(f))
-          throw new TypeError(`Token name cannot start with a number: "${f}"`);
+    function createTheme(options) {
+      if (!options || !options.name || !options.tokens) {
+        throw new TypeError('Theme requires name and tokens')
       }
-      const l = {
-        name: t,
-        tokens: Object.freeze({ ...r.tokens })
-      };
-      return Object.freeze(l);
+      const theme = { name: options.name, tokens: { ...options.tokens } }
+      Object.freeze(theme.tokens)
+      Object.freeze(theme)
+      return theme
     }
 
-    function createThemeManager(r) {
-      if (r == null || typeof r != "object")
-        throw new TypeError("Options object is required");
-      if (!Array.isArray(r.themes))
-        throw new TypeError("themes must be an array");
-      if (r.themes.length === 0)
-        throw new TypeError("themes array cannot be empty");
-      for (const e of r.themes)
-        validateTheme(e);
-      const t = new Set();
-      for (const e of r.themes) {
-        if (t.has(e.name))
-          throw new Error(`Cannot create theme manager: duplicate theme name '${e.name}'`);
-        t.add(e.name);
+    function createThemeManager(options) {
+      if (!options || !options.themes || !options.themes.length) {
+        throw new TypeError('themes array is required')
       }
-      if (r.storageKey !== void 0 && r.storageKey === "")
-        throw new TypeError("storageKey cannot be an empty string");
-      const i = r.prefix ?? "--color-", l = r.target !== void 0 ? r.target : typeof document < "u" ? document.documentElement : null, f = r.defaultTheme ?? r.themes[0].name, b = r.themes.find((e) => e.name === f);
-      if (!b)
-        throw new Error(`Cannot create theme manager: defaultTheme '${f}' not found in themes`);
-      const o = new Map(r.themes.map((e) => [e.name, e]));
-      let s = b, w = [];
-      const y = new Set(), p = new Set();
-      let a = false;
 
-      function applyCSSVariables(e) {
-        if (l !== null) {
-          for (const n of w)
-            l.style.removeProperty(n);
-          w = [];
-          for (const [n, u] of Object.entries(e.tokens)) {
-            const c = camelToKebab(n), h = i.startsWith("--") ? `${i}${c}` : `--${i}${c}`;
-            l.style.setProperty(h, u), w.push(h);
+      const registry = new Map()
+      const callbacks = new Set()
+      const systemCallbacks = new Set()
+      let currentTheme = null
+      let disposed = false
+      const storageKey = options.storageKey || null
+      const prefix = options.prefix ?? '--theme-'
+      const target = options.target !== undefined ? options.target : document.documentElement
+
+      // Register initial themes
+      options.themes.forEach(t => registry.set(t.name, t))
+
+      // Determine default
+      let defaultName = options.defaultTheme || options.themes[0].name
+
+      // Try to restore from storage
+      if (storageKey && typeof localStorage !== 'undefined') {
+        try {
+          const saved = localStorage.getItem(storageKey)
+          if (saved && registry.has(saved)) {
+            defaultName = saved
           }
+        } catch (e) {
+          console.warn('Failed to read from localStorage:', e)
         }
       }
 
-      function restoreFromStorage() {
-        if (r.storageKey)
-          try {
-            if (typeof localStorage > "u") return;
-            const e = localStorage.getItem(r.storageKey);
-            if (!e || e === "") return;
-            o.has(e) && (s = o.get(e), applyCSSVariables(s));
-          } catch (e) {
-            typeof console < "u" && console.warn && console.warn("Failed to restore theme from localStorage:", e);
-          }
+      // Apply initial theme
+      currentTheme = registry.get(defaultName)
+      applyToDOM(currentTheme)
+
+      function applyToDOM(theme) {
+        if (!target) return
+        Object.entries(theme.tokens).forEach(([key, value]) => {
+          const varName = prefix + camelToKebab(key)
+          target.style.setProperty(varName, value)
+        })
       }
 
-      function saveToStorage(e) {
-        if (r.storageKey)
-          try {
-            if (typeof localStorage > "u") return;
-            localStorage.setItem(r.storageKey, e);
-          } catch (n) {
-            typeof console < "u" && console.warn && console.warn("Failed to save theme to localStorage:", n);
-          }
+      function removeFromDOM(theme) {
+        if (!target) return
+        Object.keys(theme.tokens).forEach(key => {
+          const varName = prefix + camelToKebab(key)
+          target.style.removeProperty(varName)
+        })
       }
 
-      applyCSSVariables(s), restoreFromStorage();
+      function camelToKebab(str) {
+        return str.replace(/([A-Z])/g, '-$1').toLowerCase()
+      }
 
-      const m = {
-        apply(e) {
-          if (a)
-            throw new Error("ThemeManager has been disposed");
-          if (e == null || typeof e != "string" || e === "")
-            throw new Error("Theme name must be a non-empty string");
-          const n = o.get(e);
-          if (!n)
-            throw new Error(`Cannot apply theme: '${e}' not found`);
-          const u = s, c = s.name === e;
-          if (c || (s = n, applyCSSVariables(s)), saveToStorage(e), !c) {
-            const h = cloneTheme(s), T = cloneTheme(u);
-            for (const S of y)
-              try {
-                S(h, T);
-              } catch ($) {
-                typeof console < "u" && console.error && console.error("Error in onChange callback:", $);
-              }
-          }
-          return cloneTheme(s);
+      function saveToStorage(themeName) {
+        if (!storageKey || typeof localStorage === 'undefined') return
+        try {
+          localStorage.setItem(storageKey, themeName)
+        } catch (e) {
+          console.warn('Failed to save to localStorage:', e)
+        }
+      }
+
+      const manager = {
+        apply(themeName) {
+          if (disposed) throw new Error('Manager disposed')
+          const theme = registry.get(themeName)
+          if (!theme) throw new Error(`Theme "${themeName}" not found`)
+
+          if (currentTheme && currentTheme.name === themeName) return currentTheme
+
+          const prev = currentTheme
+          removeFromDOM(prev)
+          currentTheme = theme
+          applyToDOM(theme)
+          saveToStorage(themeName)
+
+          callbacks.forEach(cb => {
+            try { cb({ ...theme, tokens: { ...theme.tokens } }, { ...prev, tokens: { ...prev.tokens } }) }
+            catch (e) { console.error(e) }
+          })
+
+          return { ...theme, tokens: { ...theme.tokens } }
         },
+
         current() {
-          if (!a)
-            return cloneTheme(s);
+          return currentTheme ? { ...currentTheme, tokens: { ...currentTheme.tokens } } : undefined
         },
+
         currentName() {
-          return a ? "" : s.name;
+          return currentTheme?.name || ''
         },
+
         list() {
-          return a ? [] : Array.from(o.keys());
+          return Array.from(registry.keys())
         },
-        get(e) {
-          if (a)
-            return;
-          const n = o.get(e);
-          return n ? cloneTheme(n) : void 0;
+
+        get(name) {
+          const t = registry.get(name)
+          return t ? { ...t, tokens: { ...t.tokens } } : undefined
         },
-        has(e) {
-          return a || e == null || typeof e != "string" || e === "" ? false : o.has(e);
+
+        has(name) {
+          return registry.has(name)
         },
-        register(e) {
-          if (a)
-            throw new Error("ThemeManager has been disposed");
-          if (validateTheme(e), o.has(e.name))
-            throw new Error(`Cannot register theme: '${e.name}' already exists`);
-          o.set(e.name, e);
+
+        register(theme) {
+          if (disposed) throw new Error('Manager disposed')
+          if (registry.has(theme.name)) throw new Error(`Theme "${theme.name}" already exists`)
+          registry.set(theme.name, theme)
         },
-        unregister(e) {
-          if (a)
-            throw new Error("ThemeManager has been disposed");
-          const n = o.get(e);
-          if (!n)
-            throw new Error(`Cannot unregister theme: '${e}' not found`);
-          if (s.name === e)
-            throw new Error(`Cannot unregister theme: '${e}' is currently active`);
-          if (o.size === 1)
-            throw new Error(`Cannot unregister theme: '${e}' is the only theme`);
-          return o.delete(e), cloneTheme(n);
+
+        unregister(themeName) {
+          if (disposed) throw new Error('Manager disposed')
+          if (!registry.has(themeName)) throw new Error(`Theme "${themeName}" not found`)
+          if (currentTheme?.name === themeName) throw new Error(`Cannot unregister active theme`)
+          if (registry.size <= 1) throw new Error('Cannot unregister only theme')
+          const theme = registry.get(themeName)
+          registry.delete(themeName)
+          return { ...theme, tokens: { ...theme.tokens } }
         },
-        onChange(e) {
-          return a ? () => {} : (y.add(e), () => {
-            y.delete(e);
-          });
+
+        getToken(name) {
+          if (name === '__proto__') return undefined
+          return currentTheme?.tokens[name]
         },
-        clearStorage() {
-          if (r.storageKey)
-            try {
-              if (typeof localStorage > "u") return;
-              localStorage.removeItem(r.storageKey);
-            } catch {}
-        },
-        prefersDark() {
-          return typeof window > "u" || !window.matchMedia ? false : window.matchMedia("(prefers-color-scheme: dark)").matches;
-        },
-        prefersLight() {
-          return typeof window > "u" || !window.matchMedia ? false : window.matchMedia("(prefers-color-scheme: light)").matches;
-        },
-        onSystemChange(e) {
-          if (typeof window > "u" || !window.matchMedia)
-            return () => {};
-          p.add(e);
-          const n = window.matchMedia("(prefers-color-scheme: dark)"), u = window.matchMedia("(prefers-color-scheme: light)"), c = (h) => {
-            if (h.matches) {
-              const T = h.media.includes("dark") ? "dark" : "light";
-              e(T);
-            }
-          };
-          return n.addEventListener("change", c), u.addEventListener("change", c), () => {
-            p.delete(e), n.removeEventListener("change", c), u.removeEventListener("change", c);
-          };
-        },
-        applySystem(e, n) {
-          if (a)
-            throw new Error("ThemeManager has been disposed");
-          if (!o.has(e))
-            throw new Error(`Cannot apply system theme: '${e}' not found`);
-          if (!o.has(n))
-            throw new Error(`Cannot apply system theme: '${n}' not found`);
-          const c = m.prefersDark() ? n : e;
-          return m.apply(c);
-        },
-        watchSystem(e, n) {
-          if (a)
-            throw new Error("ThemeManager has been disposed");
-          if (!o.has(e))
-            throw new Error(`Cannot watch system theme: '${e}' not found`);
-          if (!o.has(n))
-            throw new Error(`Cannot watch system theme: '${n}' not found`);
-          return m.applySystem(e, n), m.onSystemChange((c) => {
-            const h = c === "dark" ? n : e;
-            m.apply(h);
-          });
-        },
-        getToken(e) {
-          if (!a)
-            return s.tokens[e];
-        },
+
         getAllTokens() {
-          return a ? {} : { ...s.tokens };
+          return currentTheme ? { ...currentTheme.tokens } : {}
         },
-        getCSSVariableName(e) {
-          const n = camelToKebab(e);
-          return i.startsWith("--") ? `${i}${n}` : `--${i}${n}`;
+
+        getCSSVariableName(tokenName) {
+          return '--' + prefix.replace(/^--/, '') + camelToKebab(tokenName)
         },
-        dispose() {
-          if (!a) {
-            if (a = true, l !== null)
-              for (const e of w)
-                l.style.removeProperty(e);
-            y.clear(), p.clear(), o.clear(), w = [];
+
+        onChange(callback) {
+          callbacks.add(callback)
+          return () => callbacks.delete(callback)
+        },
+
+        prefersDark() {
+          if (typeof window === 'undefined' || !window.matchMedia) return false
+          return window.matchMedia('(prefers-color-scheme: dark)').matches
+        },
+
+        prefersLight() {
+          if (typeof window === 'undefined' || !window.matchMedia) return false
+          return window.matchMedia('(prefers-color-scheme: light)').matches
+        },
+
+        onSystemChange(callback) {
+          if (typeof window === 'undefined' || !window.matchMedia) {
+            return () => {}
           }
+          const mql = window.matchMedia('(prefers-color-scheme: dark)')
+          const handler = (e) => callback(e.matches ? 'dark' : 'light')
+          mql.addEventListener('change', handler)
+          systemCallbacks.add({ mql, handler })
+          return () => {
+            mql.removeEventListener('change', handler)
+            systemCallbacks.delete({ mql, handler })
+          }
+        },
+
+        applySystem(lightName, darkName) {
+          if (!registry.has(lightName)) throw new Error(`Theme "${lightName}" not found`)
+          if (!registry.has(darkName)) throw new Error(`Theme "${darkName}" not found`)
+          return manager.apply(manager.prefersDark() ? darkName : lightName)
+        },
+
+        watchSystem(lightName, darkName) {
+          manager.applySystem(lightName, darkName)
+          return manager.onSystemChange((scheme) => {
+            manager.apply(scheme === 'dark' ? darkName : lightName)
+          })
+        },
+
+        clearStorage() {
+          if (!storageKey || typeof localStorage === 'undefined') return
+          try {
+            localStorage.removeItem(storageKey)
+          } catch (e) {
+            console.warn('Failed to clear localStorage:', e)
+          }
+        },
+
+        dispose() {
+          if (disposed) return
+          disposed = true
+          if (target && currentTheme) removeFromDOM(currentTheme)
+          callbacks.clear()
+          systemCallbacks.forEach(({ mql, handler }) => mql.removeEventListener('change', handler))
+          systemCallbacks.clear()
+          registry.clear()
+          currentTheme = null
         }
-      };
-      return m;
-    }
-
-    class ThemeError extends Error {
-      constructor(t) {
-        super(t);
-        this.name = "ThemeError";
       }
+
+      return manager
     }
 
-    // Expose to window for demo
-    window.createTheme = createTheme;
-    window.createThemeManager = createThemeManager;
-    window.ThemeError = ThemeError;
-
     // ============================================
-    // DEMO AND TEST CODE
+    // THEME DEFINITIONS
     // ============================================
 
-    // Define test themes
-    const lightTheme = {
+    const lightTheme = createTheme({
       name: 'light',
       tokens: {
-        primary: '#3b82f6',
-        background: '#f8f9fa',
-        surface: '#ffffff',
-        text: '#1a1a1a',
-        textMuted: '#666666',
-        border: '#ddd',
-        codeBg: '#f5f5f5'
+        bg: '#ffffff',
+        bgSecondary: '#f6f8fa',
+        bgTertiary: '#eaeef2',
+        text: '#1f2328',
+        textSecondary: '#656d76',
+        border: '#d0d7de',
+        primary: '#0969da',
+        accent: '#0969da'
       }
-    };
+    })
 
-    const darkTheme = {
+    const darkTheme = createTheme({
       name: 'dark',
       tokens: {
-        primary: '#60a5fa',
-        background: '#1a1a1a',
-        surface: '#2a2a2a',
-        text: '#f0f0f0',
-        textMuted: '#aaaaaa',
-        border: '#444',
-        codeBg: '#2a2a2a'
+        bg: '#0d1117',
+        bgSecondary: '#161b22',
+        bgTertiary: '#21262d',
+        text: '#e6edf3',
+        textSecondary: '#8b949e',
+        border: '#30363d',
+        primary: '#1f6feb',
+        accent: '#58a6ff'
       }
-    };
+    })
 
-    const solarizedTheme = {
-      name: 'solarized',
+    const oceanTheme = createTheme({
+      name: 'ocean',
       tokens: {
-        primary: '#268bd2',
-        background: '#eee8d5',
-        surface: '#e4ddc9',
-        text: '#586e75',
-        textMuted: '#93a1a1',
-        border: '#d3cbb4',
-        codeBg: '#e4ddc9'
+        bg: '#0a1628',
+        bgSecondary: '#0f2744',
+        bgTertiary: '#1a3a5c',
+        text: '#e0f2fe',
+        textSecondary: '#7dd3fc',
+        border: '#0ea5e9',
+        primary: '#0ea5e9',
+        accent: '#22d3ee'
       }
-    };
+    })
 
-    const highContrastTheme = {
-      name: 'highContrast',
-      tokens: {
-        primary: '#ff00ff',
-        background: '#000000',
-        surface: '#1a1a1a',
-        text: '#ffffff',
-        textMuted: '#cccccc',
-        border: '#ffffff',
-        codeBg: '#000000'
+    // Preset palettes for Theme Painter
+    const presets = {
+      ocean: {
+        bg: '#0a1628',
+        bgSecondary: '#0f2744',
+        bgTertiary: '#1a3a5c',
+        text: '#e0f2fe',
+        textSecondary: '#7dd3fc',
+        border: '#0ea5e9',
+        primary: '#0ea5e9',
+        accent: '#22d3ee'
+      },
+      sunset: {
+        bg: '#1c1917',
+        bgSecondary: '#292524',
+        bgTertiary: '#3f3a36',
+        text: '#fef3c7',
+        textSecondary: '#fcd34d',
+        border: '#f97316',
+        primary: '#f97316',
+        accent: '#fbbf24'
+      },
+      forest: {
+        bg: '#052e16',
+        bgSecondary: '#14532d',
+        bgTertiary: '#166534',
+        text: '#dcfce7',
+        textSecondary: '#86efac',
+        border: '#22c55e',
+        primary: '#22c55e',
+        accent: '#a3e635'
+      },
+      neon: {
+        bg: '#0f0f0f',
+        bgSecondary: '#1a1a1a',
+        bgTertiary: '#2a2a2a',
+        text: '#f0abfc',
+        textSecondary: '#e879f9',
+        border: '#d946ef',
+        primary: '#d946ef',
+        accent: '#22d3ee'
       }
-    };
+    }
 
-    // Create the theme manager for interactive demos
-    let manager = createThemeManager({
-      themes: [lightTheme, darkTheme, solarizedTheme, highContrastTheme],
-      defaultTheme: 'light',
+    // ============================================
+    // INITIALIZE THEME MANAGER
+    // ============================================
+
+    const manager = createThemeManager({
+      themes: [lightTheme, darkTheme, oceanTheme],
+      defaultTheme: 'dark',
       storageKey: 'demo-theme',
-      prefix: '--color-'
-    });
+      prefix: '--theme-'
+    })
 
-    // Set up onChange listener to update display
-    manager.onChange((newTheme, prevTheme) => {
-      document.getElementById('currentThemeDisplay').textContent = `Current: ${newTheme.name}`;
-    });
+    // Track if we're following system
+    let followingSystem = false
+    let unwatchSystem = null
 
-    // Interactive functions
-    function switchToLight() {
-      manager.apply('light');
-    }
+    // ============================================
+    // EXHIBIT 1: LIVE THEME SWITCHER
+    // ============================================
 
-    function switchToDark() {
-      manager.apply('dark');
-    }
+    const themeButtonsContainer = document.getElementById('theme-buttons')
+    const storageValueEl = document.getElementById('storage-value')
+    const systemIconEl = document.getElementById('system-icon')
+    const systemLabelEl = document.getElementById('system-label')
+    const modeLabelEl = document.getElementById('mode-label')
+    const followingBoxEl = document.getElementById('following-box')
 
-    function switchToSolarized() {
-      manager.apply('solarized');
-    }
+    function renderThemeButtons() {
+      const themes = [
+        { name: 'light', icon: '☀', label: 'Light', colors: ['#ffffff', '#f6f8fa', '#0969da', '#1f2328'] },
+        { name: 'dark', icon: '☾', label: 'Dark', colors: ['#0d1117', '#161b22', '#1f6feb', '#e6edf3'] },
+        { name: 'system', icon: '⚙', label: 'System', colors: ['linear-gradient(135deg, #fff 50%, #0d1117 50%)', '', '', ''] }
+      ]
 
-    function switchToHighContrast() {
-      manager.apply('highContrast');
-    }
+      themeButtonsContainer.innerHTML = themes.map(t => `
+        <button class="theme-btn ${getActiveClass(t.name)}" data-theme="${t.name}">
+          <div class="theme-btn-swatches">
+            ${t.colors.slice(0, 4).map(c =>
+              `<div class="theme-btn-swatch" style="background: ${c || 'transparent'}"></div>`
+            ).join('')}
+          </div>
+          <div class="theme-btn-label">${t.icon} ${t.label}</div>
+        </button>
+      `).join('')
 
-    function registerCustomTheme() {
-      const name = document.getElementById('customThemeName').value;
-      const primary = document.getElementById('customPrimary').value;
-      const background = document.getElementById('customBackground').value;
-      const text = document.getElementById('customText').value;
+      // Add click handlers
+      themeButtonsContainer.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const themeName = btn.dataset.theme
 
-      try {
-        manager.register({
-          name: name,
-          tokens: {
-            primary: primary,
-            background: background,
-            surface: background,
-            text: text,
-            textMuted: text,
-            border: primary,
-            codeBg: background
+          // Stop system watching if active
+          if (unwatchSystem) {
+            unwatchSystem()
+            unwatchSystem = null
           }
-        });
-        document.getElementById('customThemeOutput').innerHTML =
-          `<div style="color: #22c55e; margin-top: 10px;">✓ Theme "${name}" registered successfully!</div>`;
-      } catch (e) {
-        document.getElementById('customThemeOutput').innerHTML =
-          `<div style="color: #ef4444; margin-top: 10px;">✗ Error: ${e.message}</div>`;
-      }
+          followingSystem = false
+
+          if (themeName === 'system') {
+            followingSystem = true
+            unwatchSystem = manager.watchSystem('light', 'dark')
+          } else {
+            manager.apply(themeName)
+          }
+
+          updateUI()
+        })
+      })
     }
 
-    function applyCustomTheme() {
-      const name = document.getElementById('customThemeName').value;
+    function getActiveClass(themeName) {
+      if (themeName === 'system' && followingSystem) return 'active'
+      if (themeName !== 'system' && !followingSystem && manager.currentName() === themeName) return 'active'
+      return ''
+    }
+
+    function updateStorageDisplay() {
       try {
-        manager.apply(name);
-        document.getElementById('customThemeOutput').innerHTML =
-          `<div style="color: #22c55e; margin-top: 10px;">✓ Applied theme "${name}"</div>`;
+        const value = localStorage.getItem('demo-theme')
+        if (value) {
+          storageValueEl.textContent = `demo-theme: "${value}"`
+          storageValueEl.classList.remove('empty')
+        } else {
+          storageValueEl.textContent = '(empty)'
+          storageValueEl.classList.add('empty')
+        }
       } catch (e) {
-        document.getElementById('customThemeOutput').innerHTML =
-          `<div style="color: #ef4444; margin-top: 10px;">✗ Error: ${e.message}</div>`;
+        storageValueEl.textContent = '(unavailable)'
+        storageValueEl.classList.add('empty')
       }
     }
 
-    function listThemes() {
-      const themes = manager.list();
-      document.getElementById('themeList').textContent =
-        `Available themes: ${themes.join(', ')}\nTotal: ${themes.length}`;
+    function updateSystemIndicator() {
+      const isDark = manager.prefersDark()
+      systemIconEl.textContent = isDark ? '☾' : '☀'
+      systemLabelEl.textContent = isDark ? 'Dark' : 'Light'
+
+      modeLabelEl.textContent = followingSystem ? 'Following System' : 'Manual'
+      modeLabelEl.classList.toggle('system-following', followingSystem)
     }
 
-    function showAllTokens() {
-      const tokens = manager.getAllTokens();
-      const output = Object.entries(tokens)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join('\n');
-      document.getElementById('tokenOutput').textContent = output;
+    function updateUI() {
+      renderThemeButtons()
+      updateStorageDisplay()
+      updateSystemIndicator()
+      renderTokenCards()
+      renderRegisteredThemes()
     }
 
-    function showCSSVariables() {
-      const tokens = manager.getAllTokens();
-      const output = Object.keys(tokens)
-        .map(key => `${key} → ${manager.getCSSVariableName(key)}`)
-        .join('\n');
-      document.getElementById('tokenOutput').textContent = output;
+    // Clear storage button
+    document.getElementById('clear-storage').addEventListener('click', () => {
+      manager.clearStorage()
+      updateStorageDisplay()
+    })
+
+    // Listen for theme changes
+    manager.onChange(() => updateUI())
+
+    // Listen for system preference changes
+    manager.onSystemChange(() => updateSystemIndicator())
+
+    // ============================================
+    // EXHIBIT 2: TOKEN TRACER
+    // ============================================
+
+    const tokenGridEl = document.getElementById('token-grid')
+
+    // Map tokens to CSS properties and data attributes
+    const tokenMapping = {
+      bg: { prop: 'background', selector: '[data-token-bg]' },
+      bgSecondary: { prop: 'background', selector: '[data-token-bg-secondary]' },
+      bgTertiary: { prop: 'background', selector: '[data-token-bg-tertiary]' },
+      text: { prop: 'color', selector: '[data-token-text]' },
+      textSecondary: { prop: 'color', selector: '[data-token-text-secondary]' },
+      border: { prop: 'border-color', selector: '[data-token-border]' },
+      primary: { prop: 'background', selector: '[data-token-primary]' },
+      accent: { prop: 'color', selector: '[data-token-accent]' }
     }
 
-    function checkSystemPreference() {
-      const prefersDark = manager.prefersDark();
-      const prefersLight = manager.prefersLight();
-      document.getElementById('systemOutput').innerHTML =
-        `System prefers: ${prefersDark ? 'Dark' : prefersLight ? 'Light' : 'Unknown'}<br>` +
-        `prefersDark(): ${prefersDark}<br>` +
-        `prefersLight(): ${prefersLight}`;
-    }
+    // Add data attributes to elements
+    document.body.setAttribute('data-token-bg', '')
+    document.querySelectorAll('.exhibit, .test-runner, .status-box, .registered-theme, .theme-btn, .preset-btn')
+      .forEach(el => el.setAttribute('data-token-bg-secondary', ''))
+    document.querySelectorAll('.exhibit-controls, .test-summary, .test-progress-bar')
+      .forEach(el => el.setAttribute('data-token-bg-tertiary', ''))
+    document.querySelectorAll('.header-title, .exhibit-title, .test-runner-title, .token-card-name, .test-name')
+      .forEach(el => el.setAttribute('data-token-text', ''))
+    document.querySelectorAll('.header-description, .exhibit-description, .status-box-title')
+      .forEach(el => el.setAttribute('data-token-text-secondary', ''))
+    document.querySelectorAll('.exhibit, .header, .test-runner, .status-box, .token-card')
+      .forEach(el => el.setAttribute('data-token-border', ''))
+    document.querySelectorAll('.btn-primary, .test-progress-fill')
+      .forEach(el => el.setAttribute('data-token-primary', ''))
+    document.querySelectorAll('.header-link')
+      .forEach(el => el.setAttribute('data-token-accent', ''))
 
-    function applySystemTheme() {
-      manager.applySystem('light', 'dark');
-      document.getElementById('systemOutput').innerHTML =
-        `<div style="color: #22c55e;">✓ Applied system theme</div>`;
-    }
+    function renderTokenCards() {
+      const tokens = manager.getAllTokens()
 
-    let systemWatcher = null;
-    function watchSystemToggle() {
-      if (systemWatcher) {
-        systemWatcher();
-        systemWatcher = null;
-        document.getElementById('systemOutput').innerHTML =
-          `<div style="color: #64748b;">System watching disabled</div>`;
-      } else {
-        systemWatcher = manager.watchSystem('light', 'dark');
-        document.getElementById('systemOutput').innerHTML =
-          `<div style="color: #22c55e;">✓ System watching enabled - theme will auto-switch with OS preference</div>`;
-      }
+      tokenGridEl.innerHTML = Object.entries(tokens).map(([name, value]) => {
+        const mapping = tokenMapping[name]
+        const selector = mapping?.selector || ''
+        const count = selector ? document.querySelectorAll(selector).length : 0
+
+        return `
+          <div class="token-card" data-token-name="${name}" data-token-selector="${selector}">
+            <div class="token-card-swatch" style="background: ${value}"></div>
+            <div class="token-card-name">${name}</div>
+            <div class="token-card-value">${value}</div>
+            <div class="token-card-count">${count} elements</div>
+            <div class="token-card-copied">Copied!</div>
+          </div>
+        `
+      }).join('')
+
+      // Add hover handlers for tracing
+      tokenGridEl.querySelectorAll('.token-card').forEach(card => {
+        const selector = card.dataset.tokenSelector
+        const tokenName = card.dataset.tokenName
+
+        card.addEventListener('mouseenter', () => {
+          if (!selector) return
+          const color = manager.getToken(tokenName)
+          document.querySelectorAll(selector).forEach(el => {
+            el.style.setProperty('--trace-color', color)
+            el.classList.add('token-trace-glow')
+          })
+        })
+
+        card.addEventListener('mouseleave', () => {
+          document.querySelectorAll('.token-trace-glow').forEach(el => {
+            el.classList.remove('token-trace-glow')
+          })
+        })
+
+        card.addEventListener('click', () => {
+          const varName = manager.getCSSVariableName(tokenName)
+          navigator.clipboard.writeText(`var(${varName})`).then(() => {
+            const copied = card.querySelector('.token-card-copied')
+            copied.classList.add('show')
+            setTimeout(() => copied.classList.remove('show'), 1000)
+          })
+        })
+      })
     }
 
     // ============================================
-    // AUTOMATED TESTS
+    // EXHIBIT 3: THEME PAINTER
     // ============================================
 
-    const tests = [
-      // createTheme tests
-      {
-        name: 'createTheme: creates theme with valid input',
-        fn: async () => {
-          const theme = createTheme({ name: 'test', tokens: { primary: '#000' } });
-          if (!theme) throw new Error('Theme is undefined');
-          if (theme.name !== 'test') throw new Error('Theme name incorrect');
-        }
-      },
-      {
-        name: 'createTheme: trims whitespace from name',
-        fn: async () => {
-          const theme = createTheme({ name: '  test  ', tokens: { primary: '#000' } });
-          if (theme.name !== 'test') throw new Error('Name not trimmed');
-        }
-      },
-      {
-        name: 'createTheme: freezes theme object',
-        fn: async () => {
-          const theme = createTheme({ name: 'test', tokens: { primary: '#000' } });
-          if (!Object.isFrozen(theme)) throw new Error('Theme not frozen');
-        }
-      },
-      {
-        name: 'createTheme: freezes tokens object',
-        fn: async () => {
-          const theme = createTheme({ name: 'test', tokens: { primary: '#000' } });
-          if (!Object.isFrozen(theme.tokens)) throw new Error('Tokens not frozen');
-        }
-      },
-      {
-        name: 'createTheme: throws on undefined name',
-        fn: async () => {
-          try {
-            createTheme({ tokens: { primary: '#000' } });
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (e.message !== 'Theme name is required') throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'createTheme: throws on null name',
-        fn: async () => {
-          try {
-            createTheme({ name: null, tokens: { primary: '#000' } });
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (e.message !== 'Theme name cannot be null') throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'createTheme: throws on empty name',
-        fn: async () => {
-          try {
-            createTheme({ name: '', tokens: { primary: '#000' } });
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (e.message !== 'Theme name cannot be empty or whitespace-only') throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'createTheme: throws on empty tokens',
-        fn: async () => {
-          try {
-            createTheme({ name: 'test', tokens: {} });
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (e.message !== 'Theme tokens cannot be empty') throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'createTheme: throws on token with space',
-        fn: async () => {
-          try {
-            createTheme({ name: 'test', tokens: { 'primary color': '#000' } });
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (!e.message.includes('cannot contain spaces')) throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'createTheme: throws on token with hyphen',
-        fn: async () => {
-          try {
-            createTheme({ name: 'test', tokens: { 'primary-color': '#000' } });
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (!e.message.includes('cannot contain hyphens')) throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
+    const presetButtonsEl = document.getElementById('preset-buttons')
+    const colorPickersEl = document.getElementById('color-pickers')
+    const themeNameInput = document.getElementById('theme-name')
+    const saveThemeBtn = document.getElementById('save-theme')
+    const resetThemeBtn = document.getElementById('reset-theme')
+    const registeredThemesEl = document.getElementById('registered-themes')
 
-      // createThemeManager tests
-      {
-        name: 'createThemeManager: creates manager with valid options',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          if (!mgr) throw new Error('Manager is undefined');
-        }
-      },
-      {
-        name: 'createThemeManager: throws on null options',
-        fn: async () => {
-          try {
-            createThemeManager(null);
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (e.message !== 'Options object is required') throw new Error(`Wrong error: ${e.message}`);
+    // Current painting state
+    let paintingTokens = { ...manager.getAllTokens() }
+    let baseThemeName = manager.currentName()
+
+    function renderPresetButtons() {
+      const presetList = [
+        { name: 'ocean', colors: ['#0a1628', '#e0f2fe', '#0ea5e9', '#22d3ee'] },
+        { name: 'sunset', colors: ['#1c1917', '#fef3c7', '#f97316', '#fbbf24'] },
+        { name: 'forest', colors: ['#052e16', '#dcfce7', '#22c55e', '#a3e635'] },
+        { name: 'neon', colors: ['#0f0f0f', '#f0abfc', '#d946ef', '#22d3ee'] },
+        { name: 'random', colors: ['?', '?', '?', '?'], isRandom: true }
+      ]
+
+      presetButtonsEl.innerHTML = presetList.map(p => `
+        <button class="preset-btn" data-preset="${p.name}">
+          <div class="preset-btn-swatches">
+            ${p.colors.map(c =>
+              `<div class="preset-btn-swatch" style="background: ${c === '?' ? 'linear-gradient(45deg, #f00, #0f0, #00f)' : c}"></div>`
+            ).join('')}
+          </div>
+          <div class="preset-btn-label">${p.name.charAt(0).toUpperCase() + p.name.slice(1)}</div>
+        </button>
+      `).join('')
+
+      presetButtonsEl.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const presetName = btn.dataset.preset
+
+          if (presetName === 'random') {
+            applyRandomPalette()
+          } else {
+            applyPreset(presetName)
           }
-        }
-      },
-      {
-        name: 'createThemeManager: throws on empty themes array',
-        fn: async () => {
-          try {
-            createThemeManager({ themes: [] });
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (e.message !== 'themes array cannot be empty') throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'createThemeManager: throws on duplicate theme names',
-        fn: async () => {
-          try {
-            createThemeManager({
-              themes: [
-                { name: 'test', tokens: { primary: '#000' } },
-                { name: 'test', tokens: { primary: '#fff' } }
-              ]
-            });
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (!e.message.includes('duplicate theme name')) throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'createThemeManager: throws on nonexistent defaultTheme',
-        fn: async () => {
-          try {
-            createThemeManager({
-              themes: [{ name: 'test', tokens: { primary: '#000' } }],
-              defaultTheme: 'nonexistent'
-            });
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (!e.message.includes('not found in themes')) throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-
-      // apply tests
-      {
-        name: 'apply: applies theme by name',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [
-              { name: 'a', tokens: { primary: '#000' } },
-              { name: 'b', tokens: { primary: '#fff' } }
-            ]
-          });
-          const result = mgr.apply('b');
-          if (result.name !== 'b') throw new Error('Theme not applied');
-        }
-      },
-      {
-        name: 'apply: throws on nonexistent theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          try {
-            mgr.apply('nonexistent');
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (!e.message.includes('not found')) throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'apply: throws on empty string',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          try {
-            mgr.apply('');
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (!e.message.includes('non-empty string')) throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'apply: returns cloned theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          const result = mgr.apply('test');
-          if (Object.isFrozen(result)) throw new Error('Result should not be frozen (cloned)');
-        }
-      },
-
-      // current tests
-      {
-        name: 'current: returns current theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          const theme = mgr.current();
-          if (theme.name !== 'test') throw new Error('Wrong current theme');
-        }
-      },
-      {
-        name: 'current: returns cloned theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          const theme = mgr.current();
-          if (Object.isFrozen(theme)) throw new Error('Theme should be cloned (not frozen)');
-        }
-      },
-
-      // currentName tests
-      {
-        name: 'currentName: returns current theme name',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          if (mgr.currentName() !== 'test') throw new Error('Wrong name');
-        }
-      },
-
-      // list tests
-      {
-        name: 'list: returns all theme names',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [
-              { name: 'a', tokens: { primary: '#000' } },
-              { name: 'b', tokens: { primary: '#fff' } }
-            ]
-          });
-          const list = mgr.list();
-          if (list.length !== 2) throw new Error('Wrong list length');
-          if (!list.includes('a') || !list.includes('b')) throw new Error('Missing themes');
-        }
-      },
-
-      // get tests
-      {
-        name: 'get: returns theme by name',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          const theme = mgr.get('test');
-          if (!theme || theme.name !== 'test') throw new Error('Theme not found');
-        }
-      },
-      {
-        name: 'get: returns undefined for nonexistent theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          const theme = mgr.get('nonexistent');
-          if (theme !== undefined) throw new Error('Should return undefined');
-        }
-      },
-
-      // has tests
-      {
-        name: 'has: returns true for existing theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          if (!mgr.has('test')) throw new Error('Should return true');
-        }
-      },
-      {
-        name: 'has: returns false for nonexistent theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          if (mgr.has('nonexistent')) throw new Error('Should return false');
-        }
-      },
-      {
-        name: 'has: returns false for empty string',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          if (mgr.has('')) throw new Error('Should return false');
-        }
-      },
-
-      // register tests
-      {
-        name: 'register: registers new theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          mgr.register({ name: 'new', tokens: { primary: '#fff' } });
-          if (!mgr.has('new')) throw new Error('Theme not registered');
-        }
-      },
-      {
-        name: 'register: throws on duplicate name',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          try {
-            mgr.register({ name: 'test', tokens: { primary: '#fff' } });
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (!e.message.includes('already exists')) throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'register: throws on invalid theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          try {
-            mgr.register({ name: 'new', tokens: {} });
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (!e.message.includes('empty')) throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-
-      // unregister tests
-      {
-        name: 'unregister: removes theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [
-              { name: 'a', tokens: { primary: '#000' } },
-              { name: 'b', tokens: { primary: '#fff' } }
-            ]
-          });
-          mgr.unregister('b');
-          if (mgr.has('b')) throw new Error('Theme not removed');
-        }
-      },
-      {
-        name: 'unregister: throws on active theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [
-              { name: 'a', tokens: { primary: '#000' } },
-              { name: 'b', tokens: { primary: '#fff' } }
-            ]
-          });
-          try {
-            mgr.unregister('a');
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (!e.message.includes('currently active')) throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'unregister: throws when only one theme remains',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [
-              { name: 'a', tokens: { primary: '#000' } },
-              { name: 'b', tokens: { primary: '#fff' } }
-            ],
-            defaultTheme: 'a'
-          });
-          // Unregister the non-active theme
-          mgr.unregister('b');
-          // Now only 'a' remains and it's active
-          try {
-            mgr.unregister('a');
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (!e.message.includes('currently active')) throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'unregister: returns removed theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [
-              { name: 'a', tokens: { primary: '#000' } },
-              { name: 'b', tokens: { primary: '#fff' } }
-            ]
-          });
-          const removed = mgr.unregister('b');
-          if (removed.name !== 'b') throw new Error('Wrong theme returned');
-        }
-      },
-
-      // onChange tests
-      {
-        name: 'onChange: calls callback on theme change',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [
-              { name: 'a', tokens: { primary: '#000' } },
-              { name: 'b', tokens: { primary: '#fff' } }
-            ]
-          });
-          let called = false;
-          mgr.onChange((newTheme, prevTheme) => {
-            called = true;
-            if (newTheme.name !== 'b') throw new Error('Wrong new theme');
-            if (prevTheme.name !== 'a') throw new Error('Wrong prev theme');
-          });
-          mgr.apply('b');
-          if (!called) throw new Error('Callback not called');
-        }
-      },
-      {
-        name: 'onChange: does not call on no-op apply',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          let called = false;
-          mgr.onChange(() => { called = true; });
-          mgr.apply('test'); // Already current
-          if (called) throw new Error('Callback should not be called');
-        }
-      },
-      {
-        name: 'onChange: unsubscribe works',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [
-              { name: 'a', tokens: { primary: '#000' } },
-              { name: 'b', tokens: { primary: '#fff' } }
-            ]
-          });
-          let called = false;
-          const unsub = mgr.onChange(() => { called = true; });
-          unsub();
-          mgr.apply('b');
-          if (called) throw new Error('Callback should not be called after unsub');
-        }
-      },
-
-      // getToken tests
-      {
-        name: 'getToken: returns token value',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000', secondary: '#fff' } }]
-          });
-          const value = mgr.getToken('primary');
-          if (value !== '#000') throw new Error('Wrong token value');
-        }
-      },
-      {
-        name: 'getToken: returns undefined for nonexistent token',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          const value = mgr.getToken('nonexistent');
-          if (value !== undefined) throw new Error('Should return undefined');
-        }
-      },
-
-      // getAllTokens tests
-      {
-        name: 'getAllTokens: returns all tokens',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000', secondary: '#fff' } }]
-          });
-          const tokens = mgr.getAllTokens();
-          if (Object.keys(tokens).length !== 2) throw new Error('Wrong token count');
-          if (tokens.primary !== '#000') throw new Error('Missing primary');
-          if (tokens.secondary !== '#fff') throw new Error('Missing secondary');
-        }
-      },
-      {
-        name: 'getAllTokens: returns copy not reference',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          const tokens1 = mgr.getAllTokens();
-          const tokens2 = mgr.getAllTokens();
-          if (tokens1 === tokens2) throw new Error('Should return new object');
-        }
-      },
-
-      // getCSSVariableName tests
-      {
-        name: 'getCSSVariableName: converts token name',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }],
-            prefix: '--color-'
-          });
-          const varName = mgr.getCSSVariableName('primary');
-          if (varName !== '--color-primary') throw new Error(`Wrong var name: ${varName}`);
-        }
-      },
-      {
-        name: 'getCSSVariableName: handles camelCase',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primaryColor: '#000' } }],
-            prefix: '--color-'
-          });
-          const varName = mgr.getCSSVariableName('primaryColor');
-          if (varName !== '--color-primary-color') throw new Error(`Wrong var name: ${varName}`);
-        }
-      },
-      {
-        name: 'getCSSVariableName: handles custom prefix',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }],
-            prefix: '--theme-'
-          });
-          const varName = mgr.getCSSVariableName('primary');
-          if (varName !== '--theme-primary') throw new Error(`Wrong var name: ${varName}`);
-        }
-      },
-
-      // System preference tests
-      {
-        name: 'prefersDark: returns boolean',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          const result = mgr.prefersDark();
-          if (typeof result !== 'boolean') throw new Error('Should return boolean');
-        }
-      },
-      {
-        name: 'prefersLight: returns boolean',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          const result = mgr.prefersLight();
-          if (typeof result !== 'boolean') throw new Error('Should return boolean');
-        }
-      },
-      {
-        name: 'applySystem: applies based on preference',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [
-              { name: 'light', tokens: { primary: '#000' } },
-              { name: 'dark', tokens: { primary: '#fff' } }
-            ]
-          });
-          const result = mgr.applySystem('light', 'dark');
-          if (!result) throw new Error('Should return theme');
-          if (result.name !== 'light' && result.name !== 'dark') {
-            throw new Error('Should apply light or dark theme');
-          }
-        }
-      },
-      {
-        name: 'applySystem: throws on nonexistent light theme',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'dark', tokens: { primary: '#fff' } }]
-          });
-          try {
-            mgr.applySystem('light', 'dark');
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (!e.message.includes('not found')) throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'watchSystem: returns unsubscribe function',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [
-              { name: 'light', tokens: { primary: '#000' } },
-              { name: 'dark', tokens: { primary: '#fff' } }
-            ]
-          });
-          const unsub = mgr.watchSystem('light', 'dark');
-          if (typeof unsub !== 'function') throw new Error('Should return function');
-          unsub();
-        }
-      },
-
-      // dispose tests
-      {
-        name: 'dispose: prevents further operations',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          mgr.dispose();
-          try {
-            mgr.apply('test');
-            throw new Error('Should have thrown');
-          } catch (e) {
-            if (!e.message.includes('disposed')) throw new Error(`Wrong error: ${e.message}`);
-          }
-        }
-      },
-      {
-        name: 'dispose: returns empty from list()',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          mgr.dispose();
-          const list = mgr.list();
-          if (list.length !== 0) throw new Error('Should return empty array');
-        }
-      },
-      {
-        name: 'dispose: returns empty string from currentName()',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          mgr.dispose();
-          const name = mgr.currentName();
-          if (name !== '') throw new Error('Should return empty string');
-        }
-      },
-      {
-        name: 'dispose: can be called multiple times',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }]
-          });
-          mgr.dispose();
-          mgr.dispose(); // Should not throw
-        }
-      },
-
-      // Edge cases
-      {
-        name: 'Edge: manager with custom prefix',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }],
-            prefix: '--my-prefix-'
-          });
-          const varName = mgr.getCSSVariableName('primary');
-          if (varName !== '--my-prefix-primary') throw new Error('Custom prefix not applied');
-        }
-      },
-      {
-        name: 'Edge: manager with prefix without dashes',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens: { primary: '#000' } }],
-            prefix: 'color-'
-          });
-          const varName = mgr.getCSSVariableName('primary');
-          if (varName !== '--color-primary') throw new Error('Should add -- to prefix');
-        }
-      },
-      {
-        name: 'Edge: theme with many tokens',
-        fn: async () => {
-          const tokens = {};
-          for (let i = 0; i < 50; i++) {
-            tokens[`token${i}`] = `#${i.toString(16).padStart(6, '0')}`;
-          }
-          const mgr = createThemeManager({
-            themes: [{ name: 'test', tokens }]
-          });
-          const allTokens = mgr.getAllTokens();
-          if (Object.keys(allTokens).length !== 50) throw new Error('Not all tokens returned');
-        }
-      },
-      {
-        name: 'Edge: multiple onChange subscribers',
-        fn: async () => {
-          const mgr = createThemeManager({
-            themes: [
-              { name: 'a', tokens: { primary: '#000' } },
-              { name: 'b', tokens: { primary: '#fff' } }
-            ]
-          });
-          let count = 0;
-          mgr.onChange(() => { count++; });
-          mgr.onChange(() => { count++; });
-          mgr.onChange(() => { count++; });
-          mgr.apply('b');
-          if (count !== 3) throw new Error(`Should call all callbacks, got ${count}`);
-        }
-      }
-    ];
-
-    function logResult(name, status, error) {
-      const output = document.getElementById('test-output');
-      const className = status === 'PASS' ? 'test-pass' : 'test-fail';
-      const errorMsg = error ? ` - ${error}` : '';
-      output.innerHTML += `<div class="${className}">[${status}] ${name}${errorMsg}</div>`;
-      output.scrollTop = output.scrollHeight;
+        })
+      })
     }
 
-    function logSummary(passed, failed) {
-      const summary = document.getElementById('summary');
-      const total = passed + failed;
-      const className = failed === 0 ? 'test-pass' : 'test-fail';
-      summary.innerHTML = `<span class="${className}">${passed}/${total} tests passed</span>`;
+    function applyPreset(name) {
+      const preset = presets[name]
+      if (!preset) return
+
+      paintingTokens = { ...preset }
+      applyPaintingToPage()
+      updateColorPickers()
+      themeNameInput.value = `my-${name}-theme`
     }
 
-    async function runAllTests() {
-      clearResults();
-      let passed = 0, failed = 0;
+    function applyRandomPalette() {
+      const hue = Math.floor(Math.random() * 360)
+      const saturation = 60 + Math.floor(Math.random() * 30)
 
-      for (const test of tests) {
-        // Small delay to allow UI updates
-        await new Promise(resolve => setTimeout(resolve, 0));
-
-        try {
-          await test.fn();
-          logResult(test.name, 'PASS');
-          passed++;
-        } catch (e) {
-          logResult(test.name, 'FAIL', e.message);
-          failed++;
-        }
+      paintingTokens = {
+        bg: `hsl(${hue}, ${saturation}%, 8%)`,
+        bgSecondary: `hsl(${hue}, ${saturation}%, 12%)`,
+        bgTertiary: `hsl(${hue}, ${saturation}%, 18%)`,
+        text: `hsl(${hue}, 30%, 90%)`,
+        textSecondary: `hsl(${hue}, 40%, 70%)`,
+        border: `hsl(${hue}, ${saturation}%, 40%)`,
+        primary: `hsl(${hue}, ${saturation}%, 50%)`,
+        accent: `hsl(${(hue + 30) % 360}, ${saturation}%, 60%)`
       }
 
-      logSummary(passed, failed);
+      applyPaintingToPage()
+      updateColorPickers()
+      themeNameInput.value = 'my-random-theme'
     }
 
-    function clearResults() {
-      document.getElementById('test-output').innerHTML = '';
-      document.getElementById('summary').innerHTML = '';
+    function renderColorPickers() {
+      const tokens = manager.getAllTokens()
+      const labels = {
+        bg: 'Background',
+        bgSecondary: 'Cards',
+        bgTertiary: 'Hover',
+        text: 'Text',
+        textSecondary: 'Muted Text',
+        border: 'Border',
+        primary: 'Primary',
+        accent: 'Accent'
+      }
+
+      colorPickersEl.innerHTML = Object.entries(tokens).map(([name, value]) => `
+        <div class="color-picker-row">
+          <label class="color-picker-label">${labels[name] || name}</label>
+          <input type="color" class="color-picker-input" data-token="${name}" value="${toHex(value)}">
+        </div>
+      `).join('')
+
+      colorPickersEl.querySelectorAll('.color-picker-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const tokenName = e.target.dataset.token
+          paintingTokens[tokenName] = e.target.value
+          applyPaintingToPage()
+        })
+      })
     }
 
-    // Initialize display
-    document.getElementById('currentThemeDisplay').textContent = `Current: ${manager.currentName()}`;
+    function updateColorPickers() {
+      colorPickersEl.querySelectorAll('.color-picker-input').forEach(input => {
+        const tokenName = input.dataset.token
+        if (paintingTokens[tokenName]) {
+          input.value = toHex(paintingTokens[tokenName])
+        }
+      })
+    }
+
+    function toHex(color) {
+      // Handle HSL
+      if (color.startsWith('hsl')) {
+        const canvas = document.createElement('canvas')
+        canvas.width = canvas.height = 1
+        const ctx = canvas.getContext('2d')
+        ctx.fillStyle = color
+        ctx.fillRect(0, 0, 1, 1)
+        const data = ctx.getImageData(0, 0, 1, 1).data
+        return '#' + [data[0], data[1], data[2]].map(x => x.toString(16).padStart(2, '0')).join('')
+      }
+      // Already hex
+      if (color.startsWith('#')) return color.slice(0, 7)
+      return color
+    }
+
+    function applyPaintingToPage() {
+      const root = document.documentElement
+      Object.entries(paintingTokens).forEach(([name, value]) => {
+        const varName = '--theme-' + name.replace(/([A-Z])/g, '-$1').toLowerCase()
+        root.style.setProperty(varName, value)
+      })
+    }
+
+    function resetPainting() {
+      // Revert to current theme
+      const current = manager.current()
+      paintingTokens = { ...current.tokens }
+      applyPaintingToPage()
+      updateColorPickers()
+      themeNameInput.value = 'my-custom-theme'
+    }
+
+    saveThemeBtn.addEventListener('click', () => {
+      const name = themeNameInput.value.trim()
+      if (!name) {
+        alert('Please enter a theme name')
+        return
+      }
+
+      if (manager.has(name)) {
+        alert(`Theme "${name}" already exists`)
+        return
+      }
+
+      try {
+        const newTheme = createTheme({
+          name,
+          tokens: { ...paintingTokens }
+        })
+        manager.register(newTheme)
+        manager.apply(name)
+        themeNameInput.value = 'my-custom-theme'
+        updateUI()
+      } catch (e) {
+        alert('Failed to create theme: ' + e.message)
+      }
+    })
+
+    resetThemeBtn.addEventListener('click', resetPainting)
+
+    function renderRegisteredThemes() {
+      const themes = manager.list()
+      const builtIn = ['light', 'dark']
+
+      registeredThemesEl.innerHTML = themes.map(name => {
+        const theme = manager.get(name)
+        const isBuiltIn = builtIn.includes(name)
+        const isActive = manager.currentName() === name
+        const colors = [theme.tokens.bg, theme.tokens.text, theme.tokens.primary, theme.tokens.accent]
+
+        return `
+          <div class="registered-theme ${isActive ? 'active' : ''}" data-theme="${name}">
+            <div class="registered-theme-swatches">
+              ${colors.map(c => `<div class="registered-theme-swatch" style="background: ${c}"></div>`).join('')}
+            </div>
+            <div class="registered-theme-name">${name}</div>
+            ${!isBuiltIn ? `<button class="registered-theme-remove" data-remove="${name}">×</button>` : ''}
+          </div>
+        `
+      }).join('')
+
+      // Click to apply
+      registeredThemesEl.querySelectorAll('.registered-theme').forEach(el => {
+        el.addEventListener('click', (e) => {
+          if (e.target.classList.contains('registered-theme-remove')) return
+          const name = el.dataset.theme
+
+          // Stop system following
+          if (unwatchSystem) {
+            unwatchSystem()
+            unwatchSystem = null
+          }
+          followingSystem = false
+
+          manager.apply(name)
+          paintingTokens = { ...manager.getAllTokens() }
+          updateColorPickers()
+          updateUI()
+        })
+      })
+
+      // Remove buttons
+      registeredThemesEl.querySelectorAll('.registered-theme-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation()
+          const name = btn.dataset.remove
+
+          if (manager.currentName() === name) {
+            manager.apply('dark')
+          }
+
+          manager.unregister(name)
+          updateUI()
+        })
+      })
+    }
+
+    // ============================================
+    // TEST RUNNER
+    // ============================================
+
+    const testRunner = {
+      tests: [],
+      results: [],
+      running: false,
+
+      register(name, fn) {
+        this.tests.push({ name, fn })
+      },
+
+      async run() {
+        if (this.running) return
+        this.running = true
+        this.results = []
+
+        const output = document.getElementById('test-output')
+        const progressFill = document.getElementById('progress-fill')
+        const progressText = document.getElementById('progress-text')
+        const summary = document.getElementById('test-summary')
+        const passedCount = document.getElementById('passed-count')
+        const failedCount = document.getElementById('failed-count')
+        const skippedCount = document.getElementById('skipped-count')
+        const runBtn = document.getElementById('run-tests')
+
+        runBtn.disabled = true
+        output.innerHTML = ''
+        summary.classList.add('hidden')
+        progressFill.style.width = '0%'
+        progressFill.className = 'test-progress-fill'
+
+        let passed = 0
+        let failed = 0
+
+        for (let i = 0; i < this.tests.length; i++) {
+          const test = this.tests[i]
+          const progress = ((i + 1) / this.tests.length) * 100
+
+          progressFill.style.width = `${progress}%`
+          progressText.textContent = `Running: ${test.name}`
+
+          try {
+            await test.fn()
+            passed++
+            this.results.push({ name: test.name, passed: true })
+            output.innerHTML += `
+              <div class="test-item">
+                <span class="test-icon pass">✓</span>
+                <span class="test-name">${escapeHtml(test.name)}</span>
+              </div>
+            `
+          } catch (e) {
+            failed++
+            this.results.push({ name: test.name, passed: false, error: e.message })
+            output.innerHTML += `
+              <div class="test-item">
+                <span class="test-icon fail">✗</span>
+                <div>
+                  <div class="test-name">${escapeHtml(test.name)}</div>
+                  <div class="test-error">${escapeHtml(e.message)}</div>
+                </div>
+              </div>
+            `
+          }
+
+          output.scrollTop = output.scrollHeight
+          await new Promise(r => setTimeout(r, 20))
+        }
+
+        progressFill.classList.add(failed === 0 ? 'success' : 'failure')
+        progressText.textContent = `Complete: ${passed}/${this.tests.length} passed`
+
+        passedCount.textContent = passed
+        failedCount.textContent = failed
+        skippedCount.textContent = 0
+        summary.classList.remove('hidden')
+
+        runBtn.disabled = false
+        this.running = false
+
+        // After tests complete, play demo automatically
+        await sleep(800)
+        await runDemoPlayback()
+      }
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+    }
+
+    document.getElementById('run-tests').addEventListener('click', () => testRunner.run())
+
+    // ============================================
+    // REGISTER TESTS
+    // ============================================
+
+    // Theme creation tests
+    testRunner.register('createTheme() returns frozen theme object', () => {
+      const theme = createTheme({ name: 'test', tokens: { a: '#000' } })
+      if (!Object.isFrozen(theme)) throw new Error('Theme not frozen')
+      if (!Object.isFrozen(theme.tokens)) throw new Error('Tokens not frozen')
+    })
+
+    testRunner.register('createTheme() throws on missing name', () => {
+      try {
+        createTheme({ tokens: { a: '#000' } })
+        throw new Error('Should have thrown')
+      } catch (e) {
+        if (!e.message.includes('requires')) throw e
+      }
+    })
+
+    testRunner.register('createTheme() throws on missing tokens', () => {
+      try {
+        createTheme({ name: 'test' })
+        throw new Error('Should have thrown')
+      } catch (e) {
+        if (!e.message.includes('requires')) throw e
+      }
+    })
+
+    // Theme manager creation tests
+    testRunner.register('createThemeManager() creates manager with themes', () => {
+      const t = createTheme({ name: 'x', tokens: { a: '#000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      if (!m.has('x')) throw new Error('Theme not registered')
+      m.dispose()
+    })
+
+    testRunner.register('createThemeManager() applies default theme', () => {
+      const t1 = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const t2 = createTheme({ name: 'b', tokens: { x: '#fff' } })
+      const m = createThemeManager({ themes: [t1, t2], defaultTheme: 'b', target: null })
+      if (m.currentName() !== 'b') throw new Error('Wrong default theme')
+      m.dispose()
+    })
+
+    testRunner.register('createThemeManager() throws on empty themes', () => {
+      try {
+        createThemeManager({ themes: [], target: null })
+        throw new Error('Should have thrown')
+      } catch (e) {
+        if (!e.message.includes('required')) throw e
+      }
+    })
+
+    // Theme switching tests
+    testRunner.register('apply() switches current theme', () => {
+      const t1 = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const t2 = createTheme({ name: 'b', tokens: { x: '#fff' } })
+      const m = createThemeManager({ themes: [t1, t2], target: null })
+      m.apply('b')
+      if (m.currentName() !== 'b') throw new Error('Theme not switched')
+      m.dispose()
+    })
+
+    testRunner.register('apply() throws on unknown theme', () => {
+      const t = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      try {
+        m.apply('nonexistent')
+        throw new Error('Should have thrown')
+      } catch (e) {
+        if (!e.message.includes('not found')) throw e
+      }
+      m.dispose()
+    })
+
+    testRunner.register('apply() triggers onChange callback', () => {
+      const t1 = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const t2 = createTheme({ name: 'b', tokens: { x: '#fff' } })
+      const m = createThemeManager({ themes: [t1, t2], target: null })
+      let called = false
+      m.onChange(() => { called = true })
+      m.apply('b')
+      if (!called) throw new Error('Callback not called')
+      m.dispose()
+    })
+
+    testRunner.register('apply() same theme is no-op', () => {
+      const t = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      let calls = 0
+      m.onChange(() => { calls++ })
+      m.apply('a')
+      m.apply('a')
+      if (calls !== 0) throw new Error('Callback called on no-op')
+      m.dispose()
+    })
+
+    // Registry tests
+    testRunner.register('list() returns all theme names', () => {
+      const t1 = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const t2 = createTheme({ name: 'b', tokens: { x: '#fff' } })
+      const m = createThemeManager({ themes: [t1, t2], target: null })
+      const list = m.list()
+      if (list.length !== 2 || !list.includes('a') || !list.includes('b')) {
+        throw new Error('Wrong list')
+      }
+      m.dispose()
+    })
+
+    testRunner.register('has() returns true for registered theme', () => {
+      const t = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      if (!m.has('a')) throw new Error('has() returned false')
+      m.dispose()
+    })
+
+    testRunner.register('has() returns false for unknown theme', () => {
+      const t = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      if (m.has('unknown')) throw new Error('has() returned true')
+      m.dispose()
+    })
+
+    testRunner.register('get() returns theme copy', () => {
+      const t = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      const got = m.get('a')
+      if (got.name !== 'a') throw new Error('Wrong name')
+      if (got.tokens.x !== '#000') throw new Error('Wrong tokens')
+      m.dispose()
+    })
+
+    testRunner.register('register() adds new theme', () => {
+      const t1 = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const t2 = createTheme({ name: 'b', tokens: { x: '#fff' } })
+      const m = createThemeManager({ themes: [t1], target: null })
+      m.register(t2)
+      if (!m.has('b')) throw new Error('Theme not registered')
+      m.dispose()
+    })
+
+    testRunner.register('register() throws on duplicate name', () => {
+      const t = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      try {
+        m.register(t)
+        throw new Error('Should have thrown')
+      } catch (e) {
+        if (!e.message.includes('exists')) throw e
+      }
+      m.dispose()
+    })
+
+    testRunner.register('unregister() removes theme', () => {
+      const t1 = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const t2 = createTheme({ name: 'b', tokens: { x: '#fff' } })
+      const m = createThemeManager({ themes: [t1, t2], target: null })
+      m.unregister('b')
+      if (m.has('b')) throw new Error('Theme not removed')
+      m.dispose()
+    })
+
+    testRunner.register('unregister() throws on active theme', () => {
+      const t1 = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const t2 = createTheme({ name: 'b', tokens: { x: '#fff' } })
+      const m = createThemeManager({ themes: [t1, t2], target: null })
+      try {
+        m.unregister('a')
+        throw new Error('Should have thrown')
+      } catch (e) {
+        if (!e.message.includes('active')) throw e
+      }
+      m.dispose()
+    })
+
+    // Token access tests
+    testRunner.register('getToken() returns token value', () => {
+      const t = createTheme({ name: 'a', tokens: { color: '#ff0000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      if (m.getToken('color') !== '#ff0000') throw new Error('Wrong value')
+      m.dispose()
+    })
+
+    testRunner.register('getToken() returns undefined for missing token', () => {
+      const t = createTheme({ name: 'a', tokens: { color: '#ff0000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      if (m.getToken('missing') !== undefined) throw new Error('Should be undefined')
+      m.dispose()
+    })
+
+    testRunner.register('getToken() blocks __proto__ access', () => {
+      const t = createTheme({ name: 'a', tokens: { color: '#ff0000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      if (m.getToken('__proto__') !== undefined) throw new Error('Should be undefined')
+      m.dispose()
+    })
+
+    testRunner.register('getAllTokens() returns all tokens', () => {
+      const t = createTheme({ name: 'a', tokens: { x: '#000', y: '#fff' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      const tokens = m.getAllTokens()
+      if (tokens.x !== '#000' || tokens.y !== '#fff') throw new Error('Wrong tokens')
+      m.dispose()
+    })
+
+    testRunner.register('getAllTokens() returns copy', () => {
+      const t = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      const tokens = m.getAllTokens()
+      tokens.x = '#fff'
+      if (m.getToken('x') !== '#000') throw new Error('Original modified')
+      m.dispose()
+    })
+
+    testRunner.register('getCSSVariableName() converts token name', () => {
+      const t = createTheme({ name: 'a', tokens: { primaryColor: '#000' } })
+      const m = createThemeManager({ themes: [t], prefix: '--theme-', target: null })
+      const name = m.getCSSVariableName('primaryColor')
+      if (name !== '--theme-primary-color') throw new Error(`Wrong name: ${name}`)
+      m.dispose()
+    })
+
+    // System preference tests
+    testRunner.register('prefersDark() returns boolean', () => {
+      const t = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      const result = m.prefersDark()
+      if (typeof result !== 'boolean') throw new Error('Not a boolean')
+      m.dispose()
+    })
+
+    testRunner.register('prefersLight() returns boolean', () => {
+      const t = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      const result = m.prefersLight()
+      if (typeof result !== 'boolean') throw new Error('Not a boolean')
+      m.dispose()
+    })
+
+    testRunner.register('applySystem() applies correct theme', () => {
+      const t1 = createTheme({ name: 'light', tokens: { x: '#fff' } })
+      const t2 = createTheme({ name: 'dark', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t1, t2], target: null })
+      m.applySystem('light', 'dark')
+      const expected = m.prefersDark() ? 'dark' : 'light'
+      if (m.currentName() !== expected) throw new Error('Wrong theme applied')
+      m.dispose()
+    })
+
+    testRunner.register('watchSystem() returns unsubscribe function', () => {
+      const t1 = createTheme({ name: 'light', tokens: { x: '#fff' } })
+      const t2 = createTheme({ name: 'dark', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t1, t2], target: null })
+      const unsub = m.watchSystem('light', 'dark')
+      if (typeof unsub !== 'function') throw new Error('Not a function')
+      unsub()
+      m.dispose()
+    })
+
+    // Lifecycle tests
+    testRunner.register('dispose() cleans up manager', () => {
+      const t = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      m.dispose()
+      if (m.currentName() !== '') throw new Error('Not disposed')
+    })
+
+    testRunner.register('dispose() can be called multiple times', () => {
+      const t = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const m = createThemeManager({ themes: [t], target: null })
+      m.dispose()
+      m.dispose() // Should not throw
+    })
+
+    testRunner.register('onChange() unsubscribe works', () => {
+      const t1 = createTheme({ name: 'a', tokens: { x: '#000' } })
+      const t2 = createTheme({ name: 'b', tokens: { x: '#fff' } })
+      const m = createThemeManager({ themes: [t1, t2], target: null })
+      let calls = 0
+      const unsub = m.onChange(() => { calls++ })
+      unsub()
+      m.apply('b')
+      if (calls !== 0) throw new Error('Callback still firing')
+      m.dispose()
+    })
+
+    // ============================================
+    // DEMO AUTOMATION
+    // ============================================
+
+    let demoRunning = false
+
+    async function sleep(ms) {
+      return new Promise(r => setTimeout(r, ms))
+    }
+
+    function scrollToElement(el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+
+    function highlightElement(el) {
+      el.classList.add('demo-highlight')
+      setTimeout(() => el.classList.remove('demo-highlight'), 600)
+    }
+
+    async function simulateClick(el) {
+      el.classList.add('demo-active-btn')
+      await sleep(150)
+      el.click()
+      await sleep(150)
+      el.classList.remove('demo-active-btn')
+    }
+
+    async function simulateHover(el, duration = 400) {
+      el.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }))
+      await sleep(duration)
+      el.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }))
+    }
+
+    async function runDemoPlayback() {
+      if (demoRunning) return
+      demoRunning = true
+
+      try {
+        // ========== EXHIBIT 1: Theme Switcher ==========
+        const exhibit1 = document.getElementById('exhibit-1')
+        scrollToElement(exhibit1)
+        highlightElement(exhibit1.closest('.exhibit'))
+        await sleep(500)
+
+        // Cycle through themes
+        const themeButtons = document.querySelectorAll('#theme-buttons .theme-btn')
+        for (const btn of themeButtons) {
+          highlightElement(btn)
+          await simulateClick(btn)
+          await sleep(600)
+        }
+
+        // Back to dark
+        const darkBtn = document.querySelector('[data-theme="dark"]')
+        if (darkBtn) {
+          await simulateClick(darkBtn)
+          await sleep(400)
+        }
+
+        // Demo clear storage
+        const clearBtn = document.getElementById('clear-storage')
+        highlightElement(clearBtn)
+        await simulateClick(clearBtn)
+        await sleep(500)
+
+        // ========== EXHIBIT 2: Token Tracer ==========
+        const exhibit2 = document.getElementById('exhibit-2')
+        scrollToElement(exhibit2)
+        highlightElement(exhibit2.closest('.exhibit'))
+        await sleep(500)
+
+        // Hover over token cards to show tracing
+        const tokenCards = document.querySelectorAll('.token-card')
+        const cardsToDemo = Array.from(tokenCards).slice(0, 5) // Demo first 5 tokens
+        for (const card of cardsToDemo) {
+          highlightElement(card)
+          await simulateHover(card, 600)
+          await sleep(200)
+        }
+
+        // Click one to show copy
+        if (tokenCards[0]) {
+          await simulateClick(tokenCards[0])
+          await sleep(600)
+        }
+
+        // ========== EXHIBIT 3: Theme Painter ==========
+        const exhibit3 = document.getElementById('exhibit-3')
+        scrollToElement(exhibit3)
+        highlightElement(exhibit3.closest('.exhibit'))
+        await sleep(500)
+
+        // Demo presets
+        const presetButtons = document.querySelectorAll('.preset-btn')
+        const presetsToDemo = ['ocean', 'sunset', 'forest', 'neon', 'random']
+        for (const presetName of presetsToDemo) {
+          const btn = document.querySelector(`[data-preset="${presetName}"]`)
+          if (btn) {
+            highlightElement(btn)
+            await simulateClick(btn)
+            await sleep(500)
+          }
+        }
+
+        // Demo a color picker change
+        const colorPickers = document.querySelectorAll('.color-picker-input')
+        if (colorPickers[0]) {
+          const picker = colorPickers[0]
+          highlightElement(picker.closest('.color-picker-row'))
+          const originalColor = picker.value
+
+          // Animate through some colors
+          const colors = ['#ff0000', '#00ff00', '#0000ff', '#ff00ff', originalColor]
+          for (const color of colors) {
+            picker.value = color
+            picker.dispatchEvent(new Event('input', { bubbles: true }))
+            await sleep(300)
+          }
+        }
+
+        // Save a demo theme
+        const themeNameInput = document.getElementById('theme-name')
+        const saveBtn = document.getElementById('save-theme')
+
+        // Generate unique name
+        let themeName = 'demo-theme'
+        let counter = 1
+        while (manager.has(themeName)) {
+          themeName = `demo-theme-${counter++}`
+        }
+
+        themeNameInput.value = themeName
+        highlightElement(themeNameInput)
+        await sleep(400)
+        highlightElement(saveBtn)
+        await simulateClick(saveBtn)
+        await sleep(600)
+
+        // Show the new theme in registered themes
+        const newThemeEl = document.querySelector(`[data-theme="${themeName}"]`)
+        if (newThemeEl) {
+          highlightElement(newThemeEl)
+          await sleep(400)
+
+          // Remove it to clean up
+          const removeBtn = newThemeEl.querySelector('.registered-theme-remove')
+          if (removeBtn) {
+            await simulateClick(removeBtn)
+            await sleep(400)
+          }
+        }
+
+        // Reset to a built-in theme
+        const resetBtn = document.getElementById('reset-theme')
+        highlightElement(resetBtn)
+        await simulateClick(resetBtn)
+        await sleep(400)
+
+        // Scroll back to top
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        await sleep(500)
+
+      } finally {
+        demoRunning = false
+      }
+    }
+
+    // Button handlers
+    document.getElementById('reset-page').addEventListener('click', () => location.reload())
+
+    // ============================================
+    // INITIALIZE
+    // ============================================
+
+    renderThemeButtons()
+    renderPresetButtons()
+    renderColorPickers()
+    renderTokenCards()
+    renderRegisteredThemes()
+    updateStorageDisplay()
+    updateSystemIndicator()
   </script>
 </body>
 </html>
