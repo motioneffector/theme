@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Preferences - @motioneffector/theme</title>
+  <link rel="stylesheet" href="../demo-files/demo.css">
+  <link rel="stylesheet" href="manual.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());</script>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <h1 class="header-title">@motioneffector/theme</h1>
+      <p class="header-description">Documentation</p>
+      <nav class="header-links">
+        <a href="../index.html" class="header-link">Demo</a>
+        <a href="https://www.npmjs.com/package/@motioneffector/theme" class="header-link">npm</a>
+        <a href="https://github.com/motioneffector/theme" class="header-link">GitHub</a>
+      </nav>
+    </header>
+
+    <div class="manual-layout">
+      <aside class="manual-sidebar">
+        <nav class="sidebar-nav">
+<p><strong><a href="index.html">@motioneffector/theme</a></strong></p>
+<p><strong>Getting Started</strong></p>
+<ul>
+<li><a href="installation.html">Installation</a></li>
+<li><a href="your-first-theme-switch.html">Your First Theme Switch</a></li>
+</ul>
+<p><strong>Core Concepts</strong></p>
+<ul>
+<li><a href="concept-themes.html">Themes</a></li>
+<li><a href="concept-theme-manager.html">Theme Manager</a></li>
+<li><a href="concept-design-tokens.html">Design Tokens</a></li>
+<li><a href="concept-system-preferences.html">System Preferences</a></li>
+</ul>
+<p><strong>Guides</strong></p>
+<ul>
+<li><a href="guide-adding-dark-mode.html">Adding Dark Mode</a></li>
+<li><a href="guide-persisting-theme-choice.html">Persisting Theme Choice</a></li>
+<li><a href="guide-system-preference-detection.html">System Preference Detection</a></li>
+<li><a href="guide-runtime-token-access.html">Runtime Token Access</a></li>
+<li><a href="guide-listening-for-theme-changes.html">Listening for Theme Changes</a></li>
+<li><a href="guide-managing-themes-dynamically.html">Managing Themes Dynamically</a></li>
+</ul>
+<p><strong>API Reference</strong></p>
+<ul>
+<li><a href="api-theme-creation.html">Theme Creation</a></li>
+<li><a href="api-theme-manager-creation.html">Theme Manager Creation</a></li>
+<li><a href="api-theme-switching.html">Theme Switching</a></li>
+<li><a href="api-theme-registry.html">Theme Registry</a></li>
+<li><a href="api-token-access.html">Token Access</a></li>
+<li><a href="api-change-notifications.html">Change Notifications</a></li>
+<li><a href="api-system-preferences.html">System Preferences</a></li>
+<li><a href="api-persistence.html">Persistence</a></li>
+<li><a href="api-lifecycle.html">Lifecycle</a></li>
+<li><a href="api-errors.html">Errors</a></li>
+</ul>
+
+        </nav>
+      </aside>
+
+      <main class="manual-content">
+        <article class="manual-article">
+<h1>System Preferences</h1>
+<p>Modern operating systems let users choose their preferred color scheme—typically light or dark mode. This library can detect that preference and automatically apply the matching theme, creating a seamless experience that respects user choices.</p>
+<h2>How It Works</h2>
+<p>The browser exposes the user&#39;s preference via the <code>prefers-color-scheme</code> media query. The theme manager provides methods to:</p>
+<ol>
+<li><strong>Check</strong> the current preference (<code>prefersDark()</code>, <code>prefersLight()</code>)</li>
+<li><strong>React</strong> to changes (<code>onSystemChange()</code>)</li>
+<li><strong>Apply</strong> themes based on preference (<code>applySystem()</code>)</li>
+<li><strong>Watch</strong> and auto-switch (<code>watchSystem()</code>)</li>
+</ol>
+<pre><code>User&#39;s OS                    Theme Manager                  Your App
+┌──────────────┐             ┌──────────────┐              ┌──────────────┐
+│ Dark Mode: ON│────────────►│ prefersDark()│─────────────►│ Dark Theme   │
+└──────────────┘             │ returns true │              │ Applied      │
+                             └──────────────┘              └──────────────┘
+        │                            │
+        │ User switches              │ watchSystem()
+        │ to Light Mode              │ detects change
+        ▼                            ▼
+┌──────────────┐             ┌──────────────┐              ┌──────────────┐
+│ Dark Mode:OFF│────────────►│ callback     │─────────────►│ Light Theme  │
+└──────────────┘             │ fires        │              │ Applied      │
+                             └──────────────┘              └──────────────┘
+</code></pre>
+<h2>Basic Usage</h2>
+<pre><code class="language-typescript">import { createTheme, createThemeManager } from &#39;@motioneffector/theme&#39;
+
+const light = createTheme({
+  name: &#39;light&#39;,
+  tokens: { background: &#39;#fff&#39;, text: &#39;#000&#39; }
+})
+
+const dark = createTheme({
+  name: &#39;dark&#39;,
+  tokens: { background: &#39;#1a1a1a&#39;, text: &#39;#fff&#39; }
+})
+
+const manager = createThemeManager({
+  themes: [light, dark],
+  defaultTheme: &#39;light&#39;
+})
+
+// Apply once based on current preference
+manager.applySystem(&#39;light&#39;, &#39;dark&#39;)
+
+// Or watch continuously
+const unwatch = manager.watchSystem(&#39;light&#39;, &#39;dark&#39;)
+</code></pre>
+<h2>Key Points</h2>
+<ul>
+<li><p><strong>Detection requires a browser</strong> — In SSR or Node.js environments, <code>prefersDark()</code> and <code>prefersLight()</code> return <code>false</code>. Theme application still works, but system detection doesn&#39;t.</p>
+</li>
+<li><p><strong><code>applySystem()</code> is one-time</strong> — It checks the preference and applies the matching theme once. If the user changes their OS setting afterward, you won&#39;t see the change.</p>
+</li>
+<li><p><strong><code>watchSystem()</code> is continuous</strong> — It applies the theme immediately AND watches for changes. Call the returned function to stop watching.</p>
+</li>
+<li><p><strong>Combine with persistence carefully</strong> — If you&#39;re using <code>storageKey</code> for persistence, decide whether the saved preference or system preference takes priority. See the <a href="guide-system-preference-detection.html">guide</a> for patterns.</p>
+</li>
+</ul>
+<h2>Examples</h2>
+<h3>Check Current Preference</h3>
+<pre><code class="language-typescript">if (manager.prefersDark()) {
+  console.log(&#39;User prefers dark mode&#39;)
+} else if (manager.prefersLight()) {
+  console.log(&#39;User prefers light mode&#39;)
+}
+</code></pre>
+<h3>Listen for Changes</h3>
+<pre><code class="language-typescript">const unsubscribe = manager.onSystemChange((scheme) =&gt; {
+  console.log(`System changed to: ${scheme}`)
+  // scheme is &#39;dark&#39; or &#39;light&#39;
+})
+
+// Stop listening later
+unsubscribe()
+</code></pre>
+<h3>Apply Once on Load</h3>
+<pre><code class="language-typescript">// Good for apps where user can override the system preference
+manager.applySystem(&#39;light&#39;, &#39;dark&#39;)
+</code></pre>
+<h3>Watch Continuously</h3>
+<pre><code class="language-typescript">// Good for apps that should always match the system
+const unwatch = manager.watchSystem(&#39;light&#39;, &#39;dark&#39;)
+
+// Stop watching when component unmounts
+onUnmount(() =&gt; unwatch())
+</code></pre>
+<h3>Three-Way Toggle (Light / Dark / System)</h3>
+<pre><code class="language-typescript">type Preference = &#39;light&#39; | &#39;dark&#39; | &#39;system&#39;
+
+let userPreference: Preference = &#39;system&#39;
+let unwatchSystem: (() =&gt; void) | null = null
+
+function setPreference(pref: Preference) {
+  // Stop watching if we were
+  unwatchSystem?.()
+  unwatchSystem = null
+
+  if (pref === &#39;system&#39;) {
+    unwatchSystem = manager.watchSystem(&#39;light&#39;, &#39;dark&#39;)
+  } else {
+    manager.apply(pref)
+  }
+
+  userPreference = pref
+}
+
+// Initial setup
+setPreference(&#39;system&#39;)
+</code></pre>
+<h2>Related</h2>
+<ul>
+<li><strong><a href="concept-theme-manager.html">Theme Manager</a></strong> — Provides system preference methods</li>
+<li><strong><a href="guide-system-preference-detection.html">System Preference Detection Guide</a></strong> — Step-by-step implementation</li>
+<li><strong><a href="api-system-preferences.html">API: System Preferences</a></strong> — Full method reference</li>
+</ul>
+
+        </article>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
