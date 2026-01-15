@@ -18,7 +18,7 @@ Type-safe theme management with CSS variables, runtime switching, and automatic 
 - **Custom Prefixes** - Configure CSS variable naming conventions
 - **Zero Dependencies** - No supply chain risk
 
-[Read the full manual →](https://github.com/motioneffector/theme)
+[Read the full manual →](https://motioneffector.github.io/theme/manual/)
 
 ## Quick Start
 
