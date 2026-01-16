@@ -1,14 +1,8 @@
-// ============================================
-// LIBRARY CHECK
-// ============================================
+// Import library and expose globally for tests
+import * as Library from '../dist/index.js'
+window.Library = Library
 
-if (typeof window.Library === 'undefined') {
-  throw new Error(
-    'Library not loaded. Run `pnpm build` first, then serve this directory.'
-  )
-}
-
-const { createTheme, createThemeManager } = window.Library
+const { createTheme, createThemeManager } = Library
 
 // ============================================
 // THEME DEFINITIONS
