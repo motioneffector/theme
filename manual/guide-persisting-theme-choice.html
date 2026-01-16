@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Persisting Theme Choice - @motioneffector/theme</title>
+  <link rel="stylesheet" href="../demo-files/demo.css">
+  <link rel="stylesheet" href="manual.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());</script>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <h1 class="header-title">@motioneffector/theme</h1>
+      <p class="header-description">Documentation</p>
+      <nav class="header-links">
+        <a href="../index.html" class="header-link">Demo</a>
+        <a href="https://www.npmjs.com/package/@motioneffector/theme" class="header-link">npm</a>
+        <a href="https://github.com/motioneffector/theme" class="header-link">GitHub</a>
+      </nav>
+    </header>
+
+    <div class="manual-layout">
+      <aside class="manual-sidebar">
+        <nav class="sidebar-nav">
+<p><strong><a href="index.html">@motioneffector/theme</a></strong></p>
+<p><strong>Getting Started</strong></p>
+<ul>
+<li><a href="installation.html">Installation</a></li>
+<li><a href="your-first-theme-switch.html">Your First Theme Switch</a></li>
+</ul>
+<p><strong>Core Concepts</strong></p>
+<ul>
+<li><a href="concept-themes.html">Themes</a></li>
+<li><a href="concept-theme-manager.html">Theme Manager</a></li>
+<li><a href="concept-design-tokens.html">Design Tokens</a></li>
+<li><a href="concept-system-preferences.html">System Preferences</a></li>
+</ul>
+<p><strong>Guides</strong></p>
+<ul>
+<li><a href="guide-adding-dark-mode.html">Adding Dark Mode</a></li>
+<li><a href="guide-persisting-theme-choice.html">Persisting Theme Choice</a></li>
+<li><a href="guide-system-preference-detection.html">System Preference Detection</a></li>
+<li><a href="guide-runtime-token-access.html">Runtime Token Access</a></li>
+<li><a href="guide-listening-for-theme-changes.html">Listening for Theme Changes</a></li>
+<li><a href="guide-managing-themes-dynamically.html">Managing Themes Dynamically</a></li>
+</ul>
+<p><strong>API Reference</strong></p>
+<ul>
+<li><a href="api-theme-creation.html">Theme Creation</a></li>
+<li><a href="api-theme-manager-creation.html">Theme Manager Creation</a></li>
+<li><a href="api-theme-switching.html">Theme Switching</a></li>
+<li><a href="api-theme-registry.html">Theme Registry</a></li>
+<li><a href="api-token-access.html">Token Access</a></li>
+<li><a href="api-change-notifications.html">Change Notifications</a></li>
+<li><a href="api-system-preferences.html">System Preferences</a></li>
+<li><a href="api-persistence.html">Persistence</a></li>
+<li><a href="api-lifecycle.html">Lifecycle</a></li>
+<li><a href="api-errors.html">Errors</a></li>
+</ul>
+
+        </nav>
+      </aside>
+
+      <main class="manual-content">
+        <article class="manual-article">
+<h1>Persisting Theme Choice</h1>
+<p>Remember the user&#39;s theme selection across page reloads and browser sessions using localStorage.</p>
+<h2>Prerequisites</h2>
+<p>Before starting, you should:</p>
+<ul>
+<li>Have a <a href="your-first-theme-switch.html">working theme setup</a></li>
+<li>Understand the <a href="concept-theme-manager.html">Theme Manager</a></li>
+</ul>
+<h2>Overview</h2>
+<p>We&#39;ll enable persistence by:</p>
+<ol>
+<li>Adding a <code>storageKey</code> to the theme manager</li>
+<li>Understanding automatic restoration</li>
+<li>Clearing stored preferences when needed</li>
+</ol>
+<h2>Step 1: Add the Storage Key</h2>
+<p>Pass a <code>storageKey</code> option when creating the theme manager. This string becomes the localStorage key.</p>
+<pre><code class="language-typescript">import { createThemeManager } from &#39;@motioneffector/theme&#39;
+
+const manager = createThemeManager({
+  themes: [light, dark],
+  defaultTheme: &#39;light&#39;,
+  storageKey: &#39;my-app-theme&#39;
+})
+</code></pre>
+<p>That&#39;s it. The manager now:</p>
+<ul>
+<li>Saves the theme name to localStorage whenever <code>apply()</code> is called</li>
+<li>Restores the saved theme on initialization (if it exists and is valid)</li>
+</ul>
+<h2>Step 2: Understand the Restoration Flow</h2>
+<p>When the manager is created with a <code>storageKey</code>:</p>
+<ol>
+<li>It applies the <code>defaultTheme</code> immediately</li>
+<li>It checks localStorage for a saved value</li>
+<li>If found and valid, it applies that theme instead</li>
+</ol>
+<pre><code>Manager Created
+      │
+      ▼
+Apply defaultTheme (&#39;light&#39;)
+      │
+      ▼
+Check localStorage[&#39;my-app-theme&#39;]
+      │
+      ├─► Value: &#39;dark&#39; (exists in themes) ──► Apply &#39;dark&#39;
+      │
+      ├─► Value: &#39;ocean&#39; (not in themes) ──► Keep &#39;light&#39;
+      │
+      └─► No value stored ──► Keep &#39;light&#39;
+</code></pre>
+<h2>Step 3: Clear Storage When Needed</h2>
+<p>Use <code>clearStorage()</code> to remove the saved preference without changing the current theme.</p>
+<pre><code class="language-typescript">// Remove saved preference
+manager.clearStorage()
+
+// Next page load will use defaultTheme
+</code></pre>
+<p>This is useful for &quot;Reset to default&quot; features or when unregistering themes.</p>
+<h2>Complete Example</h2>
+<pre><code class="language-typescript">import { createTheme, createThemeManager } from &#39;@motioneffector/theme&#39;
+
+const light = createTheme({
+  name: &#39;light&#39;,
+  tokens: { background: &#39;#fff&#39;, text: &#39;#000&#39; }
+})
+
+const dark = createTheme({
+  name: &#39;dark&#39;,
+  tokens: { background: &#39;#1a1a1a&#39;, text: &#39;#fff&#39; }
+})
+
+const manager = createThemeManager({
+  themes: [light, dark],
+  defaultTheme: &#39;light&#39;,
+  storageKey: &#39;user-theme&#39;
+})
+
+// Toggle button
+document.querySelector(&#39;#toggle&#39;).addEventListener(&#39;click&#39;, () =&gt; {
+  manager.apply(manager.currentName() === &#39;light&#39; ? &#39;dark&#39; : &#39;light&#39;)
+  // Preference is automatically saved
+})
+
+// Reset button
+document.querySelector(&#39;#reset&#39;).addEventListener(&#39;click&#39;, () =&gt; {
+  manager.clearStorage()
+  manager.apply(&#39;light&#39;)
+})
+</code></pre>
+<h2>Variations</h2>
+<h3>Custom Storage Key Naming</h3>
+<p>Use a namespaced key to avoid collisions with other libraries or apps.</p>
+<pre><code class="language-typescript">const manager = createThemeManager({
+  themes: [light, dark],
+  storageKey: &#39;myapp:preferences:theme&#39;
+})
+</code></pre>
+<p>Or include a version to reset preferences after design changes:</p>
+<pre><code class="language-typescript">const manager = createThemeManager({
+  themes: [light, dark],
+  storageKey: &#39;myapp-theme-v2&#39;
+})
+</code></pre>
+<h3>Handling Storage Errors</h3>
+<p>localStorage can throw errors (private browsing, quota exceeded). The manager handles these silently—it logs a warning and continues without persistence.</p>
+<p>If you need to know when storage fails:</p>
+<pre><code class="language-typescript">// Check if storage is available
+function isStorageAvailable(): boolean {
+  try {
+    const key = &#39;__storage_test__&#39;
+    localStorage.setItem(key, key)
+    localStorage.removeItem(key)
+    return true
+  } catch {
+    return false
+  }
+}
+
+if (!isStorageAvailable()) {
+  console.log(&#39;Theme preference will not be saved&#39;)
+}
+</code></pre>
+<h3>Combining with System Preference</h3>
+<p>When using both persistence and system preference detection, decide which takes priority:</p>
+<pre><code class="language-typescript">// Option A: Saved preference wins
+const manager = createThemeManager({
+  themes: [light, dark],
+  storageKey: &#39;theme&#39;
+})
+
+// Only use system preference if nothing is saved
+if (!localStorage.getItem(&#39;theme&#39;)) {
+  manager.applySystem(&#39;light&#39;, &#39;dark&#39;)
+}
+</code></pre>
+<pre><code class="language-typescript">// Option B: Three-way toggle (explicit light, explicit dark, or system)
+const modeKey = &#39;theme-mode&#39;
+const themeKey = &#39;theme-value&#39;
+
+const mode = localStorage.getItem(modeKey) ?? &#39;system&#39;
+
+if (mode === &#39;system&#39;) {
+  manager.watchSystem(&#39;light&#39;, &#39;dark&#39;)
+} else {
+  // Theme already restored by manager via storageKey
+}
+</code></pre>
+<h2>Troubleshooting</h2>
+<h3>Saved theme not restored</h3>
+<p><strong>Symptom:</strong> The default theme always appears on page load.</p>
+<p><strong>Cause:</strong> The saved theme name doesn&#39;t match any registered theme.</p>
+<p><strong>Solution:</strong> Check that theme names match exactly (case-sensitive). If you renamed a theme, saved values won&#39;t match.</p>
+<h3>Storage quota exceeded</h3>
+<p><strong>Symptom:</strong> Console warning about storage errors.</p>
+<p><strong>Cause:</strong> localStorage is full or unavailable.</p>
+<p><strong>Solution:</strong> The manager continues working without persistence. Consider using shorter storage keys or clearing old data.</p>
+<h2>See Also</h2>
+<ul>
+<li><strong><a href="guide-system-preference-detection.html">System Preference Detection</a></strong> — Combine with OS dark mode</li>
+<li><strong><a href="api-persistence.html">API: Persistence</a></strong> — <code>clearStorage()</code> reference</li>
+<li><strong><a href="concept-theme-manager.html">Theme Manager</a></strong> — How persistence fits in</li>
+</ul>
+
+        </article>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
