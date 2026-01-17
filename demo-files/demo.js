@@ -288,11 +288,21 @@ function renderTokenCards() {
 
     card.addEventListener('click', () => {
       const varName = manager.getCSSVariableName(tokenName)
-      navigator.clipboard.writeText(`var(${varName})`).then(() => {
+      const showCopied = () => {
         const copied = card.querySelector('.token-card-copied')
         copied.classList.add('show')
         setTimeout(() => copied.classList.remove('show'), 1000)
-      })
+      }
+      // Wrap clipboard API in try/catch - it may fail in headless browsers or without permissions
+      try {
+        navigator.clipboard.writeText(`var(${varName})`).then(showCopied).catch(() => {
+          // Clipboard write failed silently (e.g., headless browser)
+          showCopied() // Still show visual feedback
+        })
+      } catch {
+        // Clipboard API not available - show feedback anyway
+        showCopied()
+      }
     })
   })
 }
