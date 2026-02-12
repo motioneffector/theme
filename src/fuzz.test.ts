@@ -397,11 +397,7 @@ describe('Fuzz: createTheme input mutations', () => {
       }
     })
 
-    if (THOROUGH_MODE) {
-      console.log(
-        `✓ Completed ${result.iterations.toLocaleString()} iterations in ${(result.durationMs / 1000).toFixed(1)}s`
-      )
-    }
+    expect(result.iterations).toBe(STANDARD_ITERATIONS)
   })
 
   it('never mutates input objects', () => {
@@ -413,7 +409,7 @@ describe('Fuzz: createTheme input mutations', () => {
       try {
         createTheme(input)
       } catch (e) {
-        // Even on error, input should not be mutated
+        expect((e as Error).message).toBeTruthy()
       }
 
       const tokensAfter = JSON.stringify(tokens)
@@ -431,7 +427,7 @@ describe('Fuzz: createTheme input mutations', () => {
       try {
         createTheme(input as any)
       } catch (e) {
-        // Expected
+        expect((e as Error).message).toBeTruthy()
       }
 
       const duration = Date.now() - start
@@ -456,12 +452,8 @@ describe('Fuzz: createTheme input mutations', () => {
           throw new Error(`Theme tokens not frozen at iteration ${i}`)
         }
       } catch (e) {
-        // If it throws, that's a generator issue, not a library issue
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
   })
@@ -489,7 +481,7 @@ describe('Fuzz: createTheme input mutations', () => {
     ]
 
     for (const { tokens, error } of invalidTokenNames) {
-      expect(() => createTheme({ name: 'test', tokens })).toThrow(TypeError)
+      expect(() => createTheme({ name: 'test', tokens })).toThrow(/Token name/i)
     }
   })
 
@@ -505,11 +497,7 @@ describe('Fuzz: createTheme input mutations', () => {
       }
     })
 
-    if (THOROUGH_MODE) {
-      console.log(
-        `✓ Completed ${result.iterations.toLocaleString()} iterations in ${(result.durationMs / 1000).toFixed(1)}s`
-      )
-    }
+    expect(result.iterations).toBe(STANDARD_ITERATIONS)
   })
 
   it('handles boundary cases for token count', () => {
@@ -566,11 +554,7 @@ describe('Fuzz: createThemeManager input mutations', () => {
       }
     })
 
-    if (THOROUGH_MODE) {
-      console.log(
-        `✓ Completed ${result.iterations.toLocaleString()} iterations in ${(result.durationMs / 1000).toFixed(1)}s`
-      )
-    }
+    expect(result.iterations).toBe(STANDARD_ITERATIONS)
   })
 
   it('never mutates input theme objects', () => {
@@ -581,7 +565,7 @@ describe('Fuzz: createThemeManager input mutations', () => {
       try {
         createThemeManager({ themes: [theme] })
       } catch (e) {
-        // Even on error, input should not be mutated
+        expect((e as Error).message).toBeTruthy()
       }
 
       const themeAfter = JSON.stringify(theme)
@@ -601,11 +585,8 @@ describe('Fuzz: createThemeManager input mutations', () => {
         expect(manager.current()).toBeDefined()
         expect(manager.currentName()).toBe(theme.name)
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw new Error(`Failed with null target at iteration ${i}: ${e}`)
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
   })
@@ -614,13 +595,13 @@ describe('Fuzz: createThemeManager input mutations', () => {
     const theme1 = createTheme({ name: 'test', tokens: { a: 'red' } })
     const theme2 = createTheme({ name: 'test', tokens: { b: 'blue' } })
 
-    expect(() => createThemeManager({ themes: [theme1, theme2] })).toThrow()
+    expect(() => createThemeManager({ themes: [theme1, theme2] })).toThrow(/duplicate/i)
   })
 
   it('validates defaultTheme exists', () => {
     const theme = createTheme({ name: 'light', tokens: { a: 'red' } })
 
-    expect(() => createThemeManager({ themes: [theme], defaultTheme: 'dark' })).toThrow()
+    expect(() => createThemeManager({ themes: [theme], defaultTheme: 'dark' })).toThrow(/not found/i)
   })
 
   it('handles various prefix values', () => {
@@ -673,19 +654,12 @@ describe('Fuzz: Property-based tests', () => {
           throw new Error(`Roundtrip inequality at iteration ${i}`)
         }
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
 
-    if (THOROUGH_MODE) {
-      console.log(
-        `✓ Completed ${result.iterations.toLocaleString()} iterations in ${(result.durationMs / 1000).toFixed(1)}s`
-      )
-    }
+    expect(result.iterations).toBe(STANDARD_ITERATIONS)
   })
 
   it('maintains apply() idempotence', () => {
@@ -716,11 +690,8 @@ describe('Fuzz: Property-based tests', () => {
           throw new Error(`apply() not idempotent at iteration ${i}`)
         }
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
   })
@@ -745,11 +716,8 @@ describe('Fuzz: Property-based tests', () => {
           throw new Error(`register/unregister not symmetric at iteration ${i}`)
         }
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
   })
@@ -776,11 +744,8 @@ describe('Fuzz: Property-based tests', () => {
           }
         }
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
   })
@@ -828,19 +793,12 @@ describe('Fuzz: Property-based tests', () => {
           throw new Error(`Callback received same object reference at iteration ${i}`)
         }
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
 
-    if (THOROUGH_MODE) {
-      console.log(
-        `✓ Completed ${result.iterations.toLocaleString()} iterations in ${(result.durationMs / 1000).toFixed(1)}s`
-      )
-    }
+    expect(result.iterations).toBe(STANDARD_ITERATIONS)
   })
 })
 
@@ -999,10 +957,7 @@ describe('Fuzz: State machine consistency', () => {
               manager.list()
             }
           } catch (e) {
-            // Expected errors are OK, but should be proper error types
-            if (!(e instanceof Error)) {
-              throw new Error(`Invalid error type: ${e}`)
-            }
+            expect(e).toBeInstanceOf(Error)
           }
 
           // Verify invariants after each operation
@@ -1024,19 +979,12 @@ describe('Fuzz: State machine consistency', () => {
           }
         }
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
 
-    if (THOROUGH_MODE) {
-      console.log(
-        `✓ Completed ${result.iterations.toLocaleString()} iterations in ${(result.durationMs / 1000).toFixed(1)}s`
-      )
-    }
+    expect(result.iterations).toBe(STANDARD_ITERATIONS)
   })
 
   it('prevents unregistering active theme', () => {
@@ -1048,17 +996,14 @@ describe('Fuzz: State machine consistency', () => {
         const manager = createThemeManager({ themes })
         const currentTheme = manager.currentName()
 
-        expect(() => manager.unregister(currentTheme)).toThrow()
+        expect(() => manager.unregister(currentTheme)).toThrow(/currently active/i)
 
         // Verify theme is still there
         expect(manager.has(currentTheme)).toBe(true)
         expect(manager.currentName()).toBe(currentTheme)
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
   })
@@ -1075,7 +1020,7 @@ describe('Fuzz: State machine consistency', () => {
 
     // Mutating list should not affect manager
     list1.push('fake')
-    expect(manager.list().length).toBe(1)
+    expect(manager.list()).toEqual(['test'])
   })
 
   it('maintains current() returns copies', () => {
@@ -1137,19 +1082,12 @@ describe('Fuzz: State machine consistency', () => {
           }
         }
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
 
-    if (THOROUGH_MODE) {
-      console.log(
-        `✓ Completed ${result.iterations.toLocaleString()} iterations in ${(result.durationMs / 1000).toFixed(1)}s`
-      )
-    }
+    expect(result.iterations).toBe(STANDARD_ITERATIONS)
   })
 
   it('handles callbacks that modify state', () => {
@@ -1181,11 +1119,8 @@ describe('Fuzz: State machine consistency', () => {
         expect(reentrantCallCount).toBeGreaterThan(0)
         expect(reentrantCallCount).toBeLessThanOrEqual(6)
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
   })
@@ -1244,19 +1179,12 @@ describe('Fuzz: Concurrency stress tests', () => {
         expect(manager.list().length).toBeGreaterThanOrEqual(initialThemes.length)
         expect(manager.has(manager.currentName())).toBe(true)
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
 
-    if (THOROUGH_MODE) {
-      console.log(
-        `✓ Completed ${result.iterations.toLocaleString()} iterations in ${(result.durationMs / 1000).toFixed(1)}s`
-      )
-    }
+    expect(result.iterations).toBe(STANDARD_ITERATIONS)
   })
 
   it('handles callback manipulation during execution', () => {
@@ -1304,18 +1232,11 @@ describe('Fuzz: Concurrency stress tests', () => {
 
         // Clean up
         for (const unsub of unsubscribes) {
-          try {
-            unsub()
-          } catch (e) {
-            // Idempotent, safe to call multiple times
-          }
+          unsub()
         }
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
   })
@@ -1337,14 +1258,11 @@ describe('Fuzz: Concurrency stress tests', () => {
         // Dispose
         manager.dispose()
 
-        // Verify dispose was called (implementation may vary)
-        // The library might not throw after dispose, just clean up resources
+        // Verify dispose worked
+        expect(manager.current()).toBe(undefined)
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
   })
@@ -1403,19 +1321,12 @@ describe('Fuzz: Concurrency stress tests', () => {
         // Should complete without memory issues
         expect(manager.list().length).toBe(initialThemes.length)
       } catch (e) {
-        if (e instanceof TypeError && e.message.includes('Token name')) {
-          // Expected validation error from invalid generator output
-        } else {
-          throw e
-        }
+        expect(e).toBeInstanceOf(TypeError)
+        expect((e as TypeError).message).toContain('Token name')
       }
     })
 
-    if (THOROUGH_MODE) {
-      console.log(
-        `✓ Completed ${result.iterations.toLocaleString()} iterations in ${(result.durationMs / 1000).toFixed(1)}s`
-      )
-    }
+    expect(result.iterations).toBe(STANDARD_ITERATIONS)
   })
 })
 

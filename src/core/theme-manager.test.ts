@@ -31,41 +31,41 @@ describe('createThemeManager(options)', () => {
 
     it('throws TypeError if options is undefined', () => {
       // @ts-expect-error - Testing runtime validation
-      expect(() => createThemeManager(undefined)).toThrow(TypeError)
+      expect(() => createThemeManager(undefined)).toThrow(/options.*required/i)
     })
 
     it('throws TypeError if options is null', () => {
       // @ts-expect-error - Testing runtime validation
-      expect(() => createThemeManager(null)).toThrow(TypeError)
+      expect(() => createThemeManager(null)).toThrow(/options.*required/i)
     })
 
     it('throws TypeError if options.themes is undefined', () => {
       // @ts-expect-error - Testing runtime validation
-      expect(() => createThemeManager({})).toThrow(TypeError)
+      expect(() => createThemeManager({})).toThrow(/themes.*array/i)
     })
 
     it('throws TypeError if options.themes is not an array', () => {
       // @ts-expect-error - Testing runtime validation
-      expect(() => createThemeManager({ themes: 'not-an-array' })).toThrow(TypeError)
+      expect(() => createThemeManager({ themes: 'not-an-array' })).toThrow(/themes.*array/i)
     })
 
     it('throws TypeError if options.themes is an empty array', () => {
-      expect(() => createThemeManager({ themes: [] })).toThrow(TypeError)
+      expect(() => createThemeManager({ themes: [] })).toThrow(/empty/i)
     })
 
     it('throws TypeError if options.themes contains non-object elements', () => {
       // @ts-expect-error - Testing runtime validation
-      expect(() => createThemeManager({ themes: ['not-an-object'] })).toThrow(TypeError)
+      expect(() => createThemeManager({ themes: ['not-an-object'] })).toThrow(/valid object/i)
     })
 
     it('throws TypeError if any theme is missing \'name\' property', () => {
       // @ts-expect-error - Testing runtime validation
-      expect(() => createThemeManager({ themes: [{ tokens: {} }] })).toThrow(TypeError)
+      expect(() => createThemeManager({ themes: [{ tokens: {} }] })).toThrow(/name/i)
     })
 
     it('throws TypeError if any theme is missing \'tokens\' property', () => {
       // @ts-expect-error - Testing runtime validation
-      expect(() => createThemeManager({ themes: [{ name: 'test' }] })).toThrow(TypeError)
+      expect(() => createThemeManager({ themes: [{ name: 'test' }] })).toThrow(/tokens/i)
     })
 
     it('throws Error if themes array contains duplicate names (exact match)', () => {
@@ -74,7 +74,7 @@ describe('createThemeManager(options)', () => {
         createTestTheme('duplicate'),
       ]
 
-      expect(() => createThemeManager({ themes })).toThrow(Error)
+      expect(() => createThemeManager({ themes })).toThrow(/duplicate/i)
     })
 
     it('throws Error if themes array contains duplicate names (case-sensitive: "Dark" and "dark" are different)', () => {
@@ -105,13 +105,13 @@ describe('createThemeManager(options)', () => {
     it('throws Error if defaultTheme doesn\'t match any theme name', () => {
       const themes = createSimpleThemes()
 
-      expect(() => createThemeManager({ themes, defaultTheme: 'nonexistent' })).toThrow(Error)
+      expect(() => createThemeManager({ themes, defaultTheme: 'nonexistent' })).toThrow(/not found/i)
     })
 
     it('defaultTheme matching is case-sensitive', () => {
       const themes = [createTestTheme('Dark')]
 
-      expect(() => createThemeManager({ themes, defaultTheme: 'dark' })).toThrow(Error)
+      expect(() => createThemeManager({ themes, defaultTheme: 'dark' })).toThrow(/not found/i)
     })
   })
 
@@ -172,7 +172,8 @@ describe('createThemeManager(options)', () => {
       const manager = createThemeManager({ themes })
       manager.apply('dark')
 
-      expect(localStorage.length).toBe(0)
+      expect(manager.currentName()).toBe('dark')
+      expect(localStorage.getItem('test-theme')).toBe(null)
     })
 
     it('enables persistence when storageKey is provided', () => {
@@ -192,7 +193,7 @@ describe('createThemeManager(options)', () => {
     it('throws TypeError if storageKey is empty string ""', () => {
       const themes = createSimpleThemes()
 
-      expect(() => createThemeManager({ themes, storageKey: '' })).toThrow(TypeError)
+      expect(() => createThemeManager({ themes, storageKey: '' })).toThrow(/storageKey.*empty/i)
     })
   })
 
@@ -258,7 +259,7 @@ describe('manager.apply(themeName)', () => {
       const manager = createThemeManager({ themes, target: mockElement })
 
       // @ts-expect-error - Testing runtime validation
-      expect(() => manager.apply(undefined)).toThrow(Error)
+      expect(() => manager.apply(undefined)).toThrow(/non-empty string/i)
     })
 
     it('throws Error if themeName is null', () => {
@@ -266,28 +267,28 @@ describe('manager.apply(themeName)', () => {
       const manager = createThemeManager({ themes, target: mockElement })
 
       // @ts-expect-error - Testing runtime validation
-      expect(() => manager.apply(null)).toThrow(Error)
+      expect(() => manager.apply(null)).toThrow(/non-empty string/i)
     })
 
     it('throws Error if themeName is empty string', () => {
       const themes = createSimpleThemes()
       const manager = createThemeManager({ themes, target: mockElement })
 
-      expect(() => manager.apply('')).toThrow(Error)
+      expect(() => manager.apply('')).toThrow(/non-empty string/i)
     })
 
     it('throws Error if theme with given name doesn\'t exist', () => {
       const themes = createSimpleThemes()
       const manager = createThemeManager({ themes, target: mockElement })
 
-      expect(() => manager.apply('nonexistent')).toThrow(Error)
+      expect(() => manager.apply('nonexistent')).toThrow(/not found/i)
     })
 
     it('name matching is case-sensitive ("Dark" !== "dark")', () => {
       const themes = [createTestTheme('Dark')]
       const manager = createThemeManager({ themes, target: mockElement })
 
-      expect(() => manager.apply('dark')).toThrow(Error)
+      expect(() => manager.apply('dark')).toThrow(/not found/i)
     })
 
     it('calling apply() with already-active theme is a no-op (but still valid)', () => {
@@ -550,8 +551,8 @@ describe('manager.current()', () => {
 
     const current = manager.current()
 
-    expect(current).toHaveProperty('name')
-    expect(current).toHaveProperty('tokens')
+    expect(current).toHaveProperty('name', 'light')
+    expect(current).toHaveProperty('tokens', { primary: '#000', background: '#fff' })
   })
 
   it('returned object is a deep copy (mutations don\'t affect internal state)', () => {
@@ -622,7 +623,7 @@ describe('manager.currentName()', () => {
 
     const name = manager.currentName()
 
-    expect(typeof name).toBe('string')
+    expect(name).toBe('light')
   })
 })
 
@@ -650,7 +651,7 @@ describe('manager.list()', () => {
     const themes = [createTestTheme('only')]
     const manager = createThemeManager({ themes })
 
-    expect(manager.list().length).toBeGreaterThan(0)
+    expect(manager.list()).toEqual(['only'])
   })
 
   it('returned array is a copy (mutations don\'t affect manager)', () => {
@@ -707,15 +708,15 @@ describe('manager.get(themeName)', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
 
-    expect(manager.get('nonexistent')).toBeUndefined()
+    expect(manager.get('nonexistent')).toBe(undefined)
   })
 
   it('matching is case-sensitive', () => {
     const themes = [createTestTheme('Dark')]
     const manager = createThemeManager({ themes })
 
-    expect(manager.get('dark')).toBeUndefined()
-    expect(manager.get('Dark')).toBeDefined()
+    expect(manager.get('dark')).toBe(undefined)
+    expect(manager.get('Dark')!.name).toBe('Dark')
   })
 
   it('returned theme is a deep copy', () => {
@@ -815,7 +816,7 @@ describe('manager.register(theme)', () => {
 
     const result = manager.register(createTestTheme('new'))
 
-    expect(result).toBeUndefined()
+    expect(result).toBe(undefined)
   })
 
   it('new theme is immediately available via get()', () => {
@@ -887,7 +888,7 @@ describe('manager.register(theme)', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
 
-    expect(() => manager.register(createTestTheme('light'))).toThrow(Error)
+    expect(() => manager.register(createTestTheme('light'))).toThrow(/already exists/i)
   })
 
   it('throws TypeError if theme is undefined', () => {
@@ -895,7 +896,7 @@ describe('manager.register(theme)', () => {
     const manager = createThemeManager({ themes })
 
     // @ts-expect-error - Testing runtime validation
-    expect(() => manager.register(undefined)).toThrow(TypeError)
+    expect(() => manager.register(undefined)).toThrow(/valid object/i)
   })
 
   it('throws TypeError if theme is null', () => {
@@ -903,7 +904,7 @@ describe('manager.register(theme)', () => {
     const manager = createThemeManager({ themes })
 
     // @ts-expect-error - Testing runtime validation
-    expect(() => manager.register(null)).toThrow(TypeError)
+    expect(() => manager.register(null)).toThrow(/valid object/i)
   })
 
   it('throws TypeError if theme is missing \'name\' property', () => {
@@ -911,7 +912,7 @@ describe('manager.register(theme)', () => {
     const manager = createThemeManager({ themes })
 
     // @ts-expect-error - Testing runtime validation
-    expect(() => manager.register({ tokens: {} })).toThrow(TypeError)
+    expect(() => manager.register({ tokens: {} })).toThrow(/name/i)
   })
 
   it('throws TypeError if theme is missing \'tokens\' property', () => {
@@ -919,21 +920,21 @@ describe('manager.register(theme)', () => {
     const manager = createThemeManager({ themes })
 
     // @ts-expect-error - Testing runtime validation
-    expect(() => manager.register({ name: 'test' })).toThrow(TypeError)
+    expect(() => manager.register({ name: 'test' })).toThrow(/tokens/i)
   })
 
   it('throws TypeError if theme.name is empty string', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
 
-    expect(() => manager.register({ name: '', tokens: {} })).toThrow(TypeError)
+    expect(() => manager.register({ name: '', tokens: {} })).toThrow(/name/i)
   })
 
   it('throws TypeError if theme.tokens is empty object', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
 
-    expect(() => manager.register({ name: 'test', tokens: {} })).toThrow(TypeError)
+    expect(() => manager.register({ name: 'test', tokens: {} })).toThrow(/empty/i)
   })
 })
 
@@ -971,7 +972,7 @@ describe('manager.unregister(themeName)', () => {
 
     manager.unregister('temp')
 
-    expect(manager.get('temp')).toBeUndefined()
+    expect(manager.get('temp')).toBe(undefined)
   })
 
   it('removed theme returns false from has()', () => {
@@ -987,14 +988,14 @@ describe('manager.unregister(themeName)', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
 
-    expect(() => manager.unregister('nonexistent')).toThrow(Error)
+    expect(() => manager.unregister('nonexistent')).toThrow(/not found/i)
   })
 
   it('throws Error if trying to remove currently active theme', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
 
-    expect(() => manager.unregister('light')).toThrow(Error)
+    expect(() => manager.unregister('light')).toThrow(/currently active/i)
   })
 
   it('does not trigger onChange callback', () => {
@@ -1055,7 +1056,7 @@ describe('Registration Edge Cases', () => {
     const themes = [createTestTheme('only')]
     const manager = createThemeManager({ themes })
 
-    expect(() => manager.unregister('only')).toThrow(Error)
+    expect(() => manager.unregister('only')).toThrow(/currently active/i)
   })
 })
 
@@ -1066,7 +1067,8 @@ describe('manager.onChange(callback)', () => {
 
     const unsubscribe = manager.onChange(() => {})
 
-    expect(typeof unsubscribe).toBe('function')
+    unsubscribe()
+    expect(manager.currentName()).toBe('light')
   })
 
   it('callback fires when theme is applied via apply()', () => {
@@ -1293,16 +1295,17 @@ describe('Unsubscribe Behavior', () => {
   it('unsubscribing during callback execution is safe (takes effect after current cycle)', () => {
     const themes = createSimpleThemes()
     const manager = createThemeManager({ themes })
+    let callCount = 0
     let unsubscribe: () => void
-    const callback = vi.fn(() => {
+    unsubscribe = manager.onChange(() => {
+      callCount++
       unsubscribe()
     })
-    unsubscribe = manager.onChange(callback)
 
     manager.apply('dark')
     manager.apply('light')
 
-    expect(callback).toHaveBeenCalledTimes(1)
+    expect(callCount).toBe(1)
   })
 
   it('unsubscribe returns void/undefined', () => {
@@ -1312,7 +1315,7 @@ describe('Unsubscribe Behavior', () => {
 
     const result = unsubscribe()
 
-    expect(result).toBeUndefined()
+    expect(result).toBe(undefined)
   })
 })
 
@@ -1418,13 +1421,13 @@ describe('Security: storage key validation', () => {
       storageKey: 'test-constructor',
       target: null,
     })
-    expect(manager1.apply('constructor')).toBeDefined()
+    expect(manager1.apply('constructor').name).toBe('constructor')
 
     const manager2 = createThemeManager({
       themes,
       storageKey: 'test-toString',
       target: null,
     })
-    expect(manager2.apply('toString')).toBeDefined()
+    expect(manager2.apply('toString').name).toBe('toString')
   })
 })

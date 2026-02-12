@@ -61,7 +61,7 @@ describe('Cleanup & Disposal', () => {
 
       // Try to trigger callback - should not fire
       // Note: We can't call apply after dispose, so we verify disposal worked in another test
-      expect(() => manager.apply('dark')).toThrow()
+      expect(() => manager.apply('dark')).toThrow(/disposed/i)
     })
 
     it('removes all onSystemChange listeners', () => {
@@ -75,7 +75,7 @@ describe('Cleanup & Disposal', () => {
 
       // After disposal, system change listeners should be cleaned up
       // This is verified by checking that the manager is disposed
-      expect(() => manager.apply('dark')).toThrow()
+      expect(() => manager.apply('dark')).toThrow(/disposed/i)
     })
 
     it('clears internal state', () => {
@@ -87,7 +87,7 @@ describe('Cleanup & Disposal', () => {
       manager.dispose()
 
       // Attempting to access methods should show manager is disposed
-      expect(() => manager.apply('light')).toThrow()
+      expect(() => manager.apply('light')).toThrow(/disposed/i)
     })
 
     it('subsequent apply() calls throw Error', () => {
@@ -96,7 +96,6 @@ describe('Cleanup & Disposal', () => {
 
       manager.dispose()
 
-      expect(() => manager.apply('dark')).toThrow(Error)
       expect(() => manager.apply('dark')).toThrow(/disposed/i)
     })
 
@@ -108,7 +107,6 @@ describe('Cleanup & Disposal', () => {
 
       const newTheme = createTestTheme('new', { color: 'blue' })
 
-      expect(() => manager.register(newTheme)).toThrow(Error)
       expect(() => manager.register(newTheme)).toThrow(/disposed/i)
     })
 
@@ -120,7 +118,7 @@ describe('Cleanup & Disposal', () => {
 
       const result = manager.current()
 
-      expect(result).toBeUndefined()
+      expect(result).toBe(undefined)
     })
 
     it('safe to call multiple times (idempotent)', () => {
@@ -145,9 +143,9 @@ describe('Cleanup & Disposal', () => {
       manager.dispose()
 
       // All methods should either throw or return safe values
-      expect(() => manager.apply('dark')).toThrow()
-      expect(() => manager.register(createTestTheme('new'))).toThrow()
-      expect(manager.current()).toBeUndefined()
+      expect(() => manager.apply('dark')).toThrow(/disposed/i)
+      expect(() => manager.register(createTestTheme('new'))).toThrow(/disposed/i)
+      expect(manager.current()).toBe(undefined)
     })
 
     it('dispose stops all watchers', () => {
@@ -174,8 +172,8 @@ describe('Cleanup & Disposal', () => {
       // Try to trigger a change (will throw, but callback shouldn't fire)
       try {
         manager.apply('dark')
-      } catch {
-        // Expected
+      } catch (error) {
+        expect((error as Error).message).toContain('disposed')
       }
 
       expect(callback).not.toHaveBeenCalled()
@@ -189,7 +187,7 @@ describe('Cleanup & Disposal', () => {
 
       const result = manager.list()
 
-      expect(result).toEqual([])
+      expect(result.every(() => false)).toBe(true)
     })
 
     it('get() returns undefined after dispose', () => {
@@ -200,7 +198,7 @@ describe('Cleanup & Disposal', () => {
 
       const result = manager.get('light')
 
-      expect(result).toBeUndefined()
+      expect(result).toBe(undefined)
     })
 
     it('has() returns false after dispose', () => {

@@ -363,8 +363,10 @@ export function createThemeManager(options: ThemeManagerOptions): ThemeManager {
       try {
         if (typeof localStorage === 'undefined') return
         localStorage.removeItem(options.storageKey)
-      } catch {
-        // Silently ignore errors
+      } catch (err) {
+        if (typeof console !== 'undefined' && console.warn) {
+          console.warn('Failed to clear theme from localStorage:', err)
+        }
       }
     },
 

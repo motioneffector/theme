@@ -1,6 +1,6 @@
 {
   "name": "@motioneffector/theme",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Type-safe theme management with CSS variables, runtime switching, and persistence support",
   "author": "motioneffector",
   "license": "MIT",
