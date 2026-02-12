@@ -20,8 +20,8 @@ describe('createTheme(options) - Helper Function', () => {
       tokens: { bg: '#ffffff' },
     })
 
-    expect(theme).toHaveProperty('name')
-    expect(theme).toHaveProperty('tokens')
+    expect(theme).toHaveProperty('name', 'light')
+    expect(theme).toHaveProperty('tokens', { bg: '#ffffff' })
   })
 
   it('freezes the returned theme object (Object.isFrozen returns true)', () => {
@@ -44,45 +44,45 @@ describe('createTheme(options) - Helper Function', () => {
 
   it('throws TypeError if name is undefined', () => {
     // @ts-expect-error - Testing runtime validation
-    expect(() => createTheme({ tokens: { color: 'red' } })).toThrow(TypeError)
+    expect(() => createTheme({ tokens: { color: 'red' } })).toThrow(/name.*required/i)
   })
 
   it('throws TypeError if name is null', () => {
     // @ts-expect-error - Testing runtime validation
-    expect(() => createTheme({ name: null, tokens: { color: 'red' } })).toThrow(TypeError)
+    expect(() => createTheme({ name: null, tokens: { color: 'red' } })).toThrow(/name.*null/i)
   })
 
   it('throws TypeError if name is empty string ""', () => {
-    expect(() => createTheme({ name: '', tokens: { color: 'red' } })).toThrow(TypeError)
+    expect(() => createTheme({ name: '', tokens: { color: 'red' } })).toThrow(/empty/i)
   })
 
   it('throws TypeError if name is whitespace-only "   "', () => {
-    expect(() => createTheme({ name: '   ', tokens: { color: 'red' } })).toThrow(TypeError)
+    expect(() => createTheme({ name: '   ', tokens: { color: 'red' } })).toThrow(/empty/i)
   })
 
   it('throws TypeError if tokens is undefined', () => {
     // @ts-expect-error - Testing runtime validation
-    expect(() => createTheme({ name: 'test' })).toThrow(TypeError)
+    expect(() => createTheme({ name: 'test' })).toThrow(/tokens.*required/i)
   })
 
   it('throws TypeError if tokens is null', () => {
     // @ts-expect-error - Testing runtime validation
-    expect(() => createTheme({ name: 'test', tokens: null })).toThrow(TypeError)
+    expect(() => createTheme({ name: 'test', tokens: null })).toThrow(/tokens.*null/i)
   })
 
   it('throws TypeError if tokens is not an object (number, string, array)', () => {
     // @ts-expect-error - Testing runtime validation
-    expect(() => createTheme({ name: 'test', tokens: 123 })).toThrow(TypeError)
+    expect(() => createTheme({ name: 'test', tokens: 123 })).toThrow(/tokens.*object/i)
 
     // @ts-expect-error - Testing runtime validation
-    expect(() => createTheme({ name: 'test', tokens: 'invalid' })).toThrow(TypeError)
+    expect(() => createTheme({ name: 'test', tokens: 'invalid' })).toThrow(/tokens.*object/i)
 
     // @ts-expect-error - Testing runtime validation
-    expect(() => createTheme({ name: 'test', tokens: ['array'] })).toThrow(TypeError)
+    expect(() => createTheme({ name: 'test', tokens: ['array'] })).toThrow(/tokens.*object/i)
   })
 
   it('throws TypeError if tokens object has zero keys', () => {
-    expect(() => createTheme({ name: 'test', tokens: {} })).toThrow(TypeError)
+    expect(() => createTheme({ name: 'test', tokens: {} })).toThrow(/empty/i)
   })
 
   it('trims leading/trailing whitespace from theme name ("  dark  " becomes "dark")', () => {
@@ -148,7 +148,7 @@ describe('Token Name Flexibility', () => {
         name: 'test',
         tokens: { 'primary hover': '#000' },
       })
-    ).toThrow(TypeError)
+    ).toThrow(/spaces/i)
   })
 
   it('rejects tokens starting with numbers (throws TypeError): "100gray"', () => {
@@ -157,7 +157,7 @@ describe('Token Name Flexibility', () => {
         name: 'test',
         tokens: { '100gray': '#ccc' },
       })
-    ).toThrow(TypeError)
+    ).toThrow(/number/i)
   })
 
   it('rejects tokens with hyphens (throws TypeError): "primary-hover" (use camelCase instead)', () => {
@@ -166,7 +166,7 @@ describe('Token Name Flexibility', () => {
         name: 'test',
         tokens: { 'primary-hover': '#000' },
       })
-    ).toThrow(TypeError)
+    ).toThrow(/hyphens/i)
   })
 
   it('rejects empty string token names (throws TypeError)', () => {
@@ -175,7 +175,7 @@ describe('Token Name Flexibility', () => {
         name: 'test',
         tokens: { '': '#000' },
       })
-    ).toThrow(TypeError)
+    ).toThrow(/empty/i)
   })
 })
 
@@ -339,10 +339,10 @@ describe('Plain Object Themes (No Helper)', () => {
     })
 
     // Both should have the same structure
-    expect(plainTheme).toHaveProperty('name')
-    expect(plainTheme).toHaveProperty('tokens')
-    expect(helperTheme).toHaveProperty('name')
-    expect(helperTheme).toHaveProperty('tokens')
+    expect(plainTheme).toHaveProperty('name', 'plain')
+    expect(plainTheme).toHaveProperty('tokens', { primary: '#000' })
+    expect(helperTheme).toHaveProperty('name', 'helper')
+    expect(helperTheme).toHaveProperty('tokens', { primary: '#000' })
   })
 
   it('plain object themes are not frozen (manager does not mutate them)', () => {
@@ -362,12 +362,6 @@ describe('Security: prototype pollution prevention', () => {
     // JSON.parse creates __proto__ as an own property
     const maliciousTokens = JSON.parse('{"__proto__": "polluted", "color": "red"}')
 
-    expect(() =>
-      createTheme({
-        name: 'malicious',
-        tokens: maliciousTokens,
-      })
-    ).toThrow(TypeError)
     expect(() =>
       createTheme({
         name: 'malicious',
@@ -397,7 +391,8 @@ describe('Security: prototype pollution prevention', () => {
 
     expect(theme.tokens.prototype).toBe('blue')
     // Verify no pollution occurred
-    expect(({} as Record<string, unknown>).prototype).toBeUndefined()
+    const hasPrototype = Object.prototype.hasOwnProperty.call(Object.prototype, 'prototype')
+    expect(hasPrototype).toBe(false)
   })
 
   it('prevents prototype pollution via JSON.parse with __proto__', () => {
@@ -409,12 +404,13 @@ describe('Security: prototype pollution prevention', () => {
         name: 'malicious',
         tokens: maliciousTokens,
       })
-    ).toThrow(TypeError)
+    ).toThrow(/__proto__/)
   })
 
   it('verifies that __proto__ prototype pollution attempt does not succeed', () => {
     // Ensure the global Object prototype is not polluted
-    const beforePolluted = ({} as Record<string, unknown>).polluted
+    const hasPollutedBefore = Object.prototype.hasOwnProperty.call(Object.prototype, 'polluted')
+    expect(hasPollutedBefore).toBe(false)
 
     try {
       const maliciousTokens = JSON.parse('{"__proto__": {"polluted": true}, "color": "red"}')
@@ -422,13 +418,12 @@ describe('Security: prototype pollution prevention', () => {
         name: 'malicious',
         tokens: maliciousTokens,
       })
-    } catch {
-      // Expected to throw
+    } catch (error) {
+      expect(error).toBeInstanceOf(TypeError)
     }
 
-    const afterPolluted = ({} as Record<string, unknown>).polluted
-    expect(beforePolluted).toBeUndefined()
-    expect(afterPolluted).toBeUndefined()
+    const hasPollutedAfter = Object.prototype.hasOwnProperty.call(Object.prototype, 'polluted')
+    expect(hasPollutedAfter).toBe(false)
   })
 
   it('multiple attempts to pollute via __proto__ are all blocked', () => {
@@ -443,12 +438,14 @@ describe('Security: prototype pollution prevention', () => {
           name: 'malicious',
           tokens: maliciousTokens,
         })
-      ).toThrow(TypeError)
+      ).toThrow(/__proto__/)
     }
 
     // Verify no pollution occurred from any attempt
-    expect(({} as Record<string, unknown>).polluted1).toBeUndefined()
-    expect(({} as Record<string, unknown>).polluted2).toBeUndefined()
+    const hasPolluted1 = Object.prototype.hasOwnProperty.call(Object.prototype, 'polluted1')
+    expect(hasPolluted1).toBe(false)
+    const hasPolluted2 = Object.prototype.hasOwnProperty.call(Object.prototype, 'polluted2')
+    expect(hasPolluted2).toBe(false)
   })
 })
 

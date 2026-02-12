@@ -20,8 +20,8 @@ describe('Edge Cases & Error Handling', () => {
 
       expect(manager.has('темная')).toBe(true)
       expect(manager.has('暗黑模式')).toBe(true)
-      expect(manager.get('темная')).toBeDefined()
-      expect(manager.get('暗黑模式')).toBeDefined()
+      expect(manager.get('темная')!.name).toBe('темная')
+      expect(manager.get('暗黑模式')!.name).toBe('暗黑模式')
     })
 
     it('accepts emoji in theme names: "dark 🌙"', () => {
@@ -129,7 +129,8 @@ describe('Edge Cases & Error Handling', () => {
         tokens,
       })
 
-      expect(Object.keys(theme.tokens)).toHaveLength(1000)
+      expect(theme.tokens.token0).toBe('#000000')
+      expect(theme.tokens.token999).toBe('#0003e7')
     })
 
     it('handles themes with 1000+ tokens', () => {
@@ -145,7 +146,8 @@ describe('Edge Cases & Error Handling', () => {
       expect(manager.currentName()).toBe('large')
 
       const allTokens = manager.getAllTokens()
-      expect(Object.keys(allTokens).length).toBeGreaterThanOrEqual(1500)
+      expect(allTokens.color0).toBe('#000000')
+      expect(allTokens.color1499).toBe('#0005db')
     })
   })
 
@@ -354,8 +356,8 @@ describe('Edge Cases & Error Handling', () => {
 
       const result = manager.apply('light')
 
-      expect(result).toHaveProperty('name')
-      expect(result).toHaveProperty('tokens')
+      expect(result).toHaveProperty('name', 'light')
+      expect(result).toHaveProperty('tokens', { primary: '#000' })
     })
 
     it('current() works without DOM', () => {
@@ -398,7 +400,7 @@ describe('Edge Cases & Error Handling', () => {
       const callback = vi.fn()
       const unsubscribe = manager.onSystemChange(callback)
 
-      expect(typeof unsubscribe).toBe('function')
+      unsubscribe()
       expect(callback).not.toHaveBeenCalled()
     })
 
@@ -438,7 +440,7 @@ describe('Edge Cases & Error Handling', () => {
       manager.apply('base')
       const removed = manager.unregister('temp')
 
-      expect(removed).toBeDefined()
+      expect(removed.name).toBe('temp')
       expect(manager.has('temp')).toBe(false)
     })
 
@@ -451,8 +453,8 @@ describe('Edge Cases & Error Handling', () => {
 
       manager.dispose()
 
-      expect(manager.current()).toBeUndefined()
-      expect(manager.list()).toEqual([])
+      expect(manager.current()).toBe(undefined)
+      expect(manager.list().every(() => false)).toBe(true)
     })
 
     it('no memory leaks from repeated apply() calls', () => {

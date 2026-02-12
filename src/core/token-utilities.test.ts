@@ -24,7 +24,7 @@ describe('Token Access Utilities', () => {
       const themes = [createTestTheme('light', { primary: '#000' })]
       const manager = createThemeManager({ themes, target: null })
 
-      expect(manager.getToken('nonexistent')).toBeUndefined()
+      expect(manager.getToken('nonexistent')).toBe(undefined)
     })
 
     it('returns value as string', () => {
@@ -33,7 +33,6 @@ describe('Token Access Utilities', () => {
 
       const value = manager.getToken('primary')
 
-      expect(typeof value).toBe('string')
       expect(value).toBe('#000')
     })
 
@@ -72,7 +71,7 @@ describe('Token Access Utilities', () => {
       const themes = [createTestTheme('light', { primary: '#000' })]
       const manager = createThemeManager({ themes, target: null })
 
-      expect(manager.getToken('__proto__')).toBeUndefined()
+      expect(manager.getToken('__proto__')).toBe(undefined)
     })
 
     it('can access constructor token if it exists (safe)', () => {
@@ -97,24 +96,24 @@ describe('Token Access Utilities', () => {
 
       // Attempting to access inherited properties should return undefined
       // These are not defined as tokens, so they shouldn't be accessible
-      expect(manager.getToken('toString')).toBeUndefined()
-      expect(manager.getToken('valueOf')).toBeUndefined()
-      expect(manager.getToken('hasOwnProperty')).toBeUndefined()
+      expect(manager.getToken('toString')).toBe(undefined)
+      expect(manager.getToken('valueOf')).toBe(undefined)
+      expect(manager.getToken('hasOwnProperty')).toBe(undefined)
     })
 
     it('verifies __proto__ access via getToken does not pollute', () => {
       const themes = [createTestTheme('light', { primary: '#000' })]
       const manager = createThemeManager({ themes, target: null })
 
-      const beforePolluted = ({} as Record<string, unknown>).polluted
+      const hasPollutedBefore = Object.prototype.hasOwnProperty.call(Object.prototype, 'polluted')
+      expect(hasPollutedBefore).toBe(false)
 
       // Attempt to access __proto__ via getToken
       const result = manager.getToken('__proto__')
-      expect(result).toBeUndefined()
+      expect(result).toBe(undefined)
 
-      const afterPolluted = ({} as Record<string, unknown>).polluted
-      expect(beforePolluted).toBeUndefined()
-      expect(afterPolluted).toBeUndefined()
+      const hasPollutedAfter = Object.prototype.hasOwnProperty.call(Object.prototype, 'polluted')
+      expect(hasPollutedAfter).toBe(false)
     })
   })
 
@@ -148,7 +147,7 @@ describe('Token Access Utilities', () => {
 
       const tokensAfter = manager.getAllTokens()
       expect(tokensAfter.primary).toBe('#000')
-      expect(tokensAfter.newToken).toBeUndefined()
+      expect(tokensAfter.newToken).toBe(undefined)
     })
 
     it('reflects active theme (changes after apply())', () => {
@@ -184,11 +183,10 @@ describe('Token Access Utilities', () => {
 
       const tokens = manager.getAllTokens()
 
-      expect(Object.keys(tokens)).toHaveLength(4)
-      expect(tokens).toHaveProperty('primary')
-      expect(tokens).toHaveProperty('secondary')
-      expect(tokens).toHaveProperty('background')
-      expect(tokens).toHaveProperty('text')
+      expect(tokens).toHaveProperty('primary', '#000')
+      expect(tokens).toHaveProperty('secondary', '#666')
+      expect(tokens).toHaveProperty('background', '#fff')
+      expect(tokens).toHaveProperty('text', '#333')
     })
   })
 

@@ -239,7 +239,7 @@ describe('Integration Tests', () => {
       manager1.clearStorage()
 
       // Assert - Storage cleared
-      expect(mockStorage._store.get(storageKey)).toBeUndefined()
+      expect(mockStorage._store.has(storageKey)).toBe(false)
 
       // Create new manager
       const manager2 = createThemeManager({
@@ -391,7 +391,7 @@ describe('Integration Tests', () => {
       expect(manager.list()).not.toContain('blue')
 
       // Assert - Cannot apply removed theme
-      expect(() => manager.apply('blue')).toThrow()
+      expect(() => manager.apply('blue')).toThrow(/not found/i)
     })
   })
 
@@ -409,7 +409,7 @@ describe('Integration Tests', () => {
       expect(manager.currentName()).toBe('light')
 
       // Act - Try to apply invalid theme
-      expect(() => manager.apply('nonexistent')).toThrow()
+      expect(() => manager.apply('nonexistent')).toThrow(/not found/i)
 
       // Assert - Theme unchanged
       expect(manager.currentName()).toBe('light')
@@ -430,7 +430,7 @@ describe('Integration Tests', () => {
 
       // Act - Try to register duplicate
       const duplicate = createTestTheme('light', { color: 'red' })
-      expect(() => manager.register(duplicate)).toThrow()
+      expect(() => manager.register(duplicate)).toThrow(/already exists/i)
 
       // Assert - Manager state unchanged
       expect(manager.list()).toEqual(originalList)
@@ -548,7 +548,7 @@ describe('Integration Tests', () => {
 
       // Cleanup
       manager.dispose()
-      expect(() => manager.apply('light')).toThrow()
+      expect(() => manager.apply('light')).toThrow(/disposed/i)
     })
   })
 })
